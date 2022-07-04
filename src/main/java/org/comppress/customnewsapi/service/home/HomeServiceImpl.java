@@ -120,6 +120,7 @@ public class HomeServiceImpl implements HomeService, BaseSpecification {
             }
             customCategoryDto.setArticle(customRatedArticleDto);
         }
+
         /*
         else {
             ArticleRepository.CustomRatedArticle article2 = articleRepository.nQSelectLatestArticle(categoryId);
