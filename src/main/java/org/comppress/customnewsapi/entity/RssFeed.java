@@ -7,9 +7,13 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
 @Data
+@Table(indexes = {
+        @Index(columnList = "lang")
+})
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity

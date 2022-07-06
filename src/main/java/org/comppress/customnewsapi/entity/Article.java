@@ -6,10 +6,19 @@ import org.springframework.beans.BeanUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(indexes = {
+        @Index(columnList = "publishedAt"),
+        @Index(columnList = "isAccessible"),
+        @Index(columnList = "rssFeedId"),
+        @Index(columnList = "countRatings")
+})
+
 public class Article extends AbstractEntity{
 
     private String author;

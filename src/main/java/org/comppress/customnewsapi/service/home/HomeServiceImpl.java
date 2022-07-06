@@ -23,7 +23,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -81,7 +85,6 @@ public class HomeServiceImpl implements HomeService, BaseSpecification {
     @Override
     public ResponseEntity<GenericPage> getUserPreference(int page,int size,String lang, List<Long> categoryIds,
                                                                List<Long> publisherIds, String fromDate, String toDate, Boolean isAccessible) {
-        /*
         // if Date not set, retrieve results for last 24 hours
         if(fromDate == null && toDate == null){
             Instant instant = Instant.now().minus(24, ChronoUnit.HOURS);
@@ -90,7 +93,6 @@ public class HomeServiceImpl implements HomeService, BaseSpecification {
             fromDate = timestamp.toLocalDateTime().format(formatter);
             log.info(fromDate);
         }
-         */
 
         final List<Long> finalPubIds = getPublisher(publisherIds, lang);
         categoryIds = getCategory(categoryIds,lang);
@@ -119,10 +121,7 @@ public class HomeServiceImpl implements HomeService, BaseSpecification {
                 customRatedArticleDto.setCount_comment(0);
             }
             customCategoryDto.setArticle(customRatedArticleDto);
-        }
-
-        /*
-        else {
+        } else {
             ArticleRepository.CustomRatedArticle article2 = articleRepository.nQSelectLatestArticle(categoryId);
             if(article2 == null) {
                 customCategoryDto.setArticle(null);
@@ -150,7 +149,7 @@ public class HomeServiceImpl implements HomeService, BaseSpecification {
                 customCategoryDto.setArticle(customRatedArticleDto);
             }
         }
-         */
+
         BeanUtils.copyProperties(category, customCategoryDto);
         return customCategoryDto;
     }
