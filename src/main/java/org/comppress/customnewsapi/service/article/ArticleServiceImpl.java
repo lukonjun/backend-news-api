@@ -45,7 +45,11 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -321,6 +325,14 @@ public class ArticleServiceImpl implements ArticleService, BaseSpecification {
                                                         List<Long> listPublisherIds, String lang,
                                                         String fromDate, String toDate, Boolean topFeed, Boolean isAccessible, String guid) {
 
+        if(fromDate == null && toDate == null){
+            Instant instant = Instant.now().minus(24, ChronoUnit.HOURS);
+            Timestamp timestamp = Timestamp.from(instant);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            fromDate = timestamp.toLocalDateTime().format(formatter);
+            log.info(fromDate);
+        }
+
         log.info("Request Parameter for /custom-news-api/articles/rated: ");
         log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, topFeed: {}, isAccessible: {}, guid: {}", page, size, categoryId, listPublisherIds, lang,
                  fromDate, toDate, topFeed, isAccessible, guid);
@@ -350,7 +362,6 @@ public class ArticleServiceImpl implements ArticleService, BaseSpecification {
             BeanUtils.copyProperties(customRatedArticle, customRatedArticleDto);
             customRatedArticleDtoList.add(customRatedArticleDto);
         });
-
 
         // Check if has been rated
         for(CustomRatedArticleDto articleDto:customRatedArticleDtoList){
