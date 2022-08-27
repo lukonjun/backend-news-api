@@ -1,8 +1,8 @@
 package org.comppress.customnewsapi.controller;
 
-import org.comppress.customnewsapi.dto.*;
+import lombok.RequiredArgsConstructor;
+import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.service.home.HomeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,14 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/home")
+@RequiredArgsConstructor
 public class HomeController {
 
     private final HomeService homeService;
-
-    @Autowired
-    public HomeController(HomeService homeService) {
-        this.homeService = homeService;
-    }
 
     @GetMapping
     public ResponseEntity<GenericPage> getUserPreference(

@@ -55,5 +55,5 @@ public class CustomRatedArticleDto {
     private Boolean isRated = false;
 
     @JsonProperty(value = "scale_image")
-    private boolean scale_image;
+    private Boolean scale_image;
 }

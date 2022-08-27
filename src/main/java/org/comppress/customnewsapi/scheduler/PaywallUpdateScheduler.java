@@ -1,11 +1,11 @@
 package org.comppress.customnewsapi.scheduler;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.comppress.customnewsapi.entity.Article;
 import org.comppress.customnewsapi.repository.ArticleRepository;
 import org.comppress.customnewsapi.service.article.ArticleService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 @Configuration
 @EnableScheduling
 @Slf4j
+@RequiredArgsConstructor
 public class PaywallUpdateScheduler {
 
     @Value("${scheduler.paywall.enabled}")
@@ -28,12 +29,6 @@ public class PaywallUpdateScheduler {
 
     private final ArticleRepository articleRepository;
     private final ArticleService articleService;
-
-    @Autowired
-    public PaywallUpdateScheduler(ArticleRepository articleRepository, ArticleService articleService) {
-        this.articleRepository = articleRepository;
-        this.articleService = articleService;
-    }
 
     @Scheduled(fixedDelayString = "${scheduler.paywall.triggeringIntervalMilliSeconds}",
             initialDelayString = "${scheduler.paywall.initialDelayIntervalMilliSeconds}")

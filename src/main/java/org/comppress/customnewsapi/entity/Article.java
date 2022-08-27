@@ -4,10 +4,7 @@ import lombok.Data;
 import org.comppress.customnewsapi.dto.ArticleDto;
 import org.springframework.beans.BeanUtils;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,7 +15,6 @@ import java.time.LocalDateTime;
         @Index(columnList = "rssFeedId"),
         @Index(columnList = "countRatings")
 })
-
 public class Article extends AbstractEntity{
 
     private String author;
