@@ -1,6 +1,8 @@
 package org.comppress.customnewsapi.repository;
 
 import org.comppress.customnewsapi.entity.Article;
+import org.comppress.customnewsapi.repository.article.CustomArticle;
+import org.comppress.customnewsapi.repository.article.CustomRatedArticle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,18 +15,23 @@ import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
-    Optional<Article> findByUrlAndIsTopNewsFalse(String url);
-
     Page<Article> findByIsAccessibleUpdatedFalse(Pageable pageable);
 
     @Query(value = "SELECT * FROM article ORDER BY RAND() LIMIT :numberArticles ", nativeQuery = true)
     List<Article> retrieveRandomArticles(@Param("numberArticles") Integer numberArticles);
 
-    @Query(value = "SELECT * FROM article JOIN rss_feed rf on rf.id = article.rss_feed_id WHERE rf.category_id = :categoryId ", nativeQuery = true)
-    List<Article> retrieveArticlesByCategoryId(@Param("categoryId") Long categoryId);
-
-    @Query(value = "Select a.id as article_id, a.author, a.title, a.description, a.url, a.url_to_image, a.guid, a.published_at, a.content, a.count_ratings, a.is_accessible, a.scale_image as scale_image, rf.category_id as category_id, c.name as category_name, 0 as count_comment, rf.publisher_id as publisher_id, p.name as publisher_name " +
-            "from article a JOIN rss_feed rf on rf.id = a.rss_feed_id JOIN category c on c.id = rf.category_id JOIN publisher p on p.id = rf.publisher_id WHERE rf.category_id = :categoryId AND a.published_at is not null Order by a.published_at DESC Limit 1", nativeQuery = true)
+    @Query(value = """
+            Select a.id as article_id, a.author, a.title, a.description, a.url, a.url_to_image, a.guid,
+                   a.published_at, a.content, a.count_ratings, a.is_accessible, a.scale_image as scale_image,
+                   rf.category_id as category_id, c.name as category_name, 0 as count_comment, rf.publisher_id as publisher_id,
+                   p.name as publisher_name
+            from article a
+                JOIN rss_feed rf on rf.id = a.rss_feed_id
+                JOIN category c on c.id = rf.category_id
+                JOIN publisher p on p.id = rf.publisher_id
+            WHERE rf.category_id = :categoryId
+              AND a.published_at is not null Order by a.published_at DESC Limit 1
+            """, nativeQuery = true)
     CustomRatedArticle nQSelectLatestArticle(@Param("categoryId") Long categoryId);
 
     boolean existsById(Long id);
@@ -92,26 +99,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             @Param("toDate") LocalDateTime toDate,
             @Param("isAccessible") Boolean isAccessible,
             Pageable pageable);
-
-    interface CustomArticle {
-        Long getId();
-        String getAuthor();
-        String getTitle();
-        String getDescription();
-        String getUrl();
-        String getUrlToImage();
-        String getPublishedAt();
-        Integer getCountRatings();
-        Boolean getIsAccessible();
-        Boolean getIsTopNews();
-        String getPublisherName();
-        Long getPublisherId();
-        Integer getCountComment();
-        Long getCategoryId();
-        String getCategoryName();
-        Boolean getIsRated();
-        Boolean getScaleImage();
-    }
 
     @Query(value = "select c.id as category_id, c.name as category_name, 0 as count_comment, t.article_id, a.author, a.title, a.description, a.url, a.url_to_image, a.guid, a.published_at, a.content, a.count_ratings, a.is_accessible, a.scale_image, t.average_rating_criteria_1, t.average_rating_criteria_2, t.average_rating_criteria_3, sum(t.average_rating_criteria_1 + t.average_rating_criteria_2 + t.average_rating_criteria_3)/" +
             "(CASE WHEN  t.average_rating_criteria_1 IS NULL THEN 0 ELSE 1 END + CASE WHEN t.average_rating_criteria_2 IS NULL THEN 0 ELSE 1 END + CASE WHEN t.average_rating_criteria_3 IS NULL THEN 0 ELSE 1 END) AS total_average_rating " +
@@ -373,53 +360,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             @Param("userId") Long userId,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate);
-
-
-    interface CustomRatedArticle {
-        Long getPublisher_id();
-
-        Integer getCount_comment();
-
-        String getPublisher_name();
-
-        Long getArticle_id();
-
-        String getAuthor();
-
-        String getTitle();
-
-        String getDescription();
-
-        String getUrl();
-
-        String getUrl_to_image();
-
-        String getGuid();
-
-        String getPublished_at();
-
-        String getContent();
-
-        Integer getCount_ratings();
-
-        Boolean getIs_accessible();
-
-        Boolean getIs_top_news();
-
-        Boolean getScale_image();
-
-        Double getAverage_rating_criteria_1();
-
-        Double getAverage_rating_criteria_2();
-
-        Double getAverage_rating_criteria_3();
-
-        Double getTotal_average_rating();
-
-        Long getCategory_id();
-
-        String getCategory_name();
-    }
 
 
 }
