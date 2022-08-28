@@ -1,6 +1,6 @@
 package org.comppress.customnewsapi.controller;
 
-import org.comppress.customnewsapi.dto.CustomArticleDto;
+import org.comppress.customnewsapi.dto.article.CustomArticleDto;
 import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.exceptions.AuthenticationException;
 import org.comppress.customnewsapi.service.article.ArticleService;

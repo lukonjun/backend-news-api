@@ -3,7 +3,7 @@ package org.comppress.customnewsapi.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.SchedulerLock;
-import org.comppress.customnewsapi.entity.Article;
+import org.comppress.customnewsapi.entity.ArticleEntity;
 import org.comppress.customnewsapi.repository.ArticleRepository;
 import org.comppress.customnewsapi.service.article.ArticleService;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,8 +36,8 @@ public class PaywallUpdateScheduler {
     public void saveNewsFeed() throws URISyntaxException, IOException {
         if(enabled){
             log.info("Paywall Scheduler Running!");
-            Page<Article> articleList = articleRepository.findByIsAccessibleUpdatedFalse(PageRequest.of(0, pageSize));
-            for (Article article : articleList.toList()) {
+            Page<ArticleEntity> articleList = articleRepository.findByIsAccessibleUpdatedFalse(PageRequest.of(0, pageSize));
+            for (ArticleEntity article : articleList.toList()) {
                 articleService.update(article);
             }
         }

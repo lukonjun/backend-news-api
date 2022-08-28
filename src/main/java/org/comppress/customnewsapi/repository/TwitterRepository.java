@@ -1,10 +1,10 @@
 package org.comppress.customnewsapi.repository;
 
-import org.comppress.customnewsapi.entity.TwitterTweet;
+import org.comppress.customnewsapi.entity.TwitterTweetEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TwitterRepository extends JpaRepository<TwitterTweet,Long> {
+public interface TwitterRepository extends JpaRepository<TwitterTweetEntity,Long> {
 
-    TwitterTweet findByArticleId(Long articleId);
+    TwitterTweetEntity findByArticleId(Long articleId);
 
 }

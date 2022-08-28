@@ -24,9 +24,13 @@ public class NewsFeedScheduler {
             initialDelayString = "${scheduler.news-feed.initialDelayIntervalMilliSeconds}")
     @SchedulerLock(name = "newsFeedingScheduler")
     public void saveNewsFeed(){
-        if(enabled){
-            log.info("News Scheduler Running!");
-            articleService.fetchArticlesFromRssFeeds();
+        try {
+            if(enabled){
+                log.info("News Scheduler Running!");
+                articleService.fetchArticlesFromRssFeeds();
+            }
+        } catch (Throwable e){
+            log.error("Scheduled Task error", e);
         }
     }
 

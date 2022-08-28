@@ -7,9 +7,9 @@ import org.comppress.customnewsapi.dto.SubmitRatingDto;
 import org.comppress.customnewsapi.dto.response.CreateRatingResponseDto;
 import org.comppress.customnewsapi.dto.response.ResponseDto;
 import org.comppress.customnewsapi.dto.response.UpdateRatingResponseDto;
-import org.comppress.customnewsapi.entity.Article;
-import org.comppress.customnewsapi.entity.Criteria;
-import org.comppress.customnewsapi.entity.Rating;
+import org.comppress.customnewsapi.entity.ArticleEntity;
+import org.comppress.customnewsapi.entity.CriteriaEntity;
+import org.comppress.customnewsapi.entity.RatingEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
 import org.comppress.customnewsapi.exceptions.ArticleDoesNotExistException;
 import org.comppress.customnewsapi.exceptions.AuthenticationException;
@@ -37,7 +37,7 @@ public class RatingService {
     private final AppAuthenticationService appAuthenticationService;
 
     public List<RatingDto> getRatings() {
-        List<Rating> ratingList = ratingRepository.findAll();
+        List<RatingEntity> ratingList = ratingRepository.findAll();
         List<RatingDto> ratingDtoList = new ArrayList<>();
         ratingList.stream().map(rating -> ratingDtoList.add(rating.toDto()));
         return ratingDtoList;
@@ -51,14 +51,14 @@ public class RatingService {
             if(userEntity == null) throw new AuthenticationException("You are not authorized, please login","");
         }
 
-        List<Rating> ratings = new ArrayList<>();
+        List<RatingEntity> ratings = new ArrayList<>();
         boolean shouldUpdateRating = false;
         if (userEntity == null && guid != null) {
             // NOT LOGGED IN USER WITH GUID
             for (CriteriaRatingDto criteriaRating : submitRatingDto.getRatings()) {
                 checkIfRatingInValidRange(criteriaRating);
                 validateArticleAndCriteria(submitRatingDto, criteriaRating);
-                Rating rating = ratingRepository.findByGuidAndArticleIdAndCriteriaId(guid,
+                RatingEntity rating = ratingRepository.findByGuidAndArticleIdAndCriteriaId(guid,
                         submitRatingDto.getArticleId(),
                         criteriaRating.getCriteriaId());
                 shouldUpdateRating = prepareRating(shouldUpdateRating,submitRatingDto, guid, ratings, criteriaRating, rating, 0L);
@@ -68,7 +68,7 @@ public class RatingService {
             for (CriteriaRatingDto criteriaRating : submitRatingDto.getRatings()) {
                 checkIfRatingInValidRange(criteriaRating);
                 validateArticleAndCriteria(submitRatingDto, criteriaRating);
-                Rating rating = ratingRepository.findByUserIdAndArticleIdAndCriteriaId(userEntity.getId(),
+                RatingEntity rating = ratingRepository.findByUserIdAndArticleIdAndCriteriaId(userEntity.getId(),
                         submitRatingDto.getArticleId(),
                         criteriaRating.getCriteriaId());
                 shouldUpdateRating = prepareRating(shouldUpdateRating,submitRatingDto, "-", ratings, criteriaRating, rating, userEntity.getId());
@@ -76,7 +76,7 @@ public class RatingService {
         }
         ratingRepository.saveAll(ratings);
         if(shouldUpdateRating){
-            Optional<Article> article = articleRepository.findById(submitRatingDto.getArticleId());
+            Optional<ArticleEntity> article = articleRepository.findById(submitRatingDto.getArticleId());
             if (article.isPresent()) {
                 Integer countRatings = article.get().getCountRatings();
                 if (countRatings == null) countRatings = 0;
@@ -102,13 +102,13 @@ public class RatingService {
         }
     }
 
-    private boolean prepareRating(boolean isUpdateRating, SubmitRatingDto submitRatingDto, String guid, List<Rating> ratings, CriteriaRatingDto criteriaRating, Rating rating, long l) {
+    private boolean prepareRating(boolean isUpdateRating, SubmitRatingDto submitRatingDto, String guid, List<RatingEntity> ratings, CriteriaRatingDto criteriaRating, RatingEntity rating, long l) {
         if (rating != null) {
             rating.setRating(criteriaRating.getRating());
             ratings.add(rating);
             isUpdateRating = true;
         } else {
-            Rating newRating = Rating.builder()
+            RatingEntity newRating = RatingEntity.builder()
                     .rating(criteriaRating.getRating())
                     .articleId(submitRatingDto.getArticleId())
                     .criteriaId(criteriaRating.getCriteriaId())
@@ -132,11 +132,11 @@ public class RatingService {
     public void createRandomRatings(int numberRandomRatings) throws Exception {
         Random random = new Random();
         String guid = UUID.randomUUID().toString();
-        List<Criteria> criteriaList = criteriaRepository.findAll();
-        for (Article article : articleRepository.retrieveRandomArticles(numberRandomRatings)) {
+        List<CriteriaEntity> criteriaList = criteriaRepository.findAll();
+        for (ArticleEntity article : articleRepository.retrieveRandomArticles(numberRandomRatings)) {
             SubmitRatingDto submitRatingDto = new SubmitRatingDto();
             List<CriteriaRatingDto> criteriaRatingDtoList = new ArrayList<>();
-            for (Criteria criteria : criteriaList) {
+            for (CriteriaEntity criteria : criteriaList) {
                 CriteriaRatingDto criteriaRatingDto = new CriteriaRatingDto();
                 criteriaRatingDto.setRating(random.nextInt(5) + 1);
                 criteriaRatingDto.setCriteriaId(criteria.getId());

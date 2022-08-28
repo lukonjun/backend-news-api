@@ -6,7 +6,7 @@ import org.comppress.customnewsapi.dto.SubmitRatingDto;
 import org.comppress.customnewsapi.dto.response.CreateRatingResponseDto;
 import org.comppress.customnewsapi.dto.response.ResponseDto;
 import org.comppress.customnewsapi.dto.response.UpdateRatingResponseDto;
-import org.comppress.customnewsapi.entity.Rating;
+import org.comppress.customnewsapi.entity.RatingEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
 import org.comppress.customnewsapi.exceptions.ArticleDoesNotExistException;
 import org.comppress.customnewsapi.exceptions.CriteriaDoesNotExistException;
@@ -70,7 +70,7 @@ class RatingServiceImplTests {
 
         when(criteriaRepositoryMock.existsById(1L)).thenReturn(true);
 
-        Rating rating = new Rating(1L, 3L, 1234L, 2, "-");
+        RatingEntity rating = new RatingEntity(1L, 3L, 1234L, 2, "-");
 
         when(ratingRepositoryMock.findByUserIdAndArticleIdAndCriteriaId(userEntity.getId(), 1234L, 1L))
                 .thenReturn(rating);
@@ -141,7 +141,7 @@ class RatingServiceImplTests {
 
         when(criteriaRepositoryMock.existsById(1L)).thenReturn(true);
 
-        Rating rating = new Rating(1L, 3L, 1234L, 2, "fooBar");
+        RatingEntity rating = new RatingEntity(1L, 3L, 1234L, 2, "fooBar");
 
         when(ratingRepositoryMock.findByGuidAndArticleIdAndCriteriaId("fooBar", 1234L, 1L))
                 .thenReturn(rating);

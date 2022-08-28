@@ -1,8 +1,8 @@
 package org.comppress.customnewsapi.utils;
 
-import org.comppress.customnewsapi.dto.CustomRatedArticleDto;
+import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
 import org.comppress.customnewsapi.dto.GenericPage;
-import org.comppress.customnewsapi.repository.article.CustomRatedArticle;
+import org.comppress.customnewsapi.entity.article.CustomRatedArticle;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 

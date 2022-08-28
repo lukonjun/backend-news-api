@@ -42,7 +42,7 @@ scheduler:
   news-feed:
     triggeringIntervalMilliSeconds: 40000
     initialDelayIntervalMilliSeconds: 5000
-    enabled: no
+    enabled: yes
   paywall:
     triggeringIntervalMilliSeconds: 20000
     initialDelayIntervalMilliSeconds: 4000

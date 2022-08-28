@@ -7,13 +7,15 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TwitterTweet extends AbstractEntity{
+@Table(name = "twitter_tweet")
+public class TwitterTweetEntity extends AbstractEntity{
 
     private Long articleId;
     private Long twitterId;
