@@ -3,17 +3,18 @@ package org.comppress.customnewsapi.service.home;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.comppress.customnewsapi.dto.CustomCategoryDto;
-import org.comppress.customnewsapi.dto.CustomRatedArticleDto;
+import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
 import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.entity.AbstractEntity;
-import org.comppress.customnewsapi.entity.Category;
-import org.comppress.customnewsapi.entity.Publisher;
+import org.comppress.customnewsapi.entity.CategoryEntity;
+import org.comppress.customnewsapi.entity.PublisherEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
+import org.comppress.customnewsapi.mapper.MapstructMapper;
 import org.comppress.customnewsapi.repository.ArticleRepository;
 import org.comppress.customnewsapi.repository.CategoryRepository;
 import org.comppress.customnewsapi.repository.PublisherRepository;
 import org.comppress.customnewsapi.repository.UserRepository;
-import org.comppress.customnewsapi.repository.article.CustomRatedArticle;
+import org.comppress.customnewsapi.entity.article.CustomRatedArticle;
 import org.comppress.customnewsapi.service.BaseSpecification;
 import org.comppress.customnewsapi.service.twitter.TwitterService;
 import org.comppress.customnewsapi.utils.DateUtils;
@@ -43,6 +44,7 @@ public class HomeService implements BaseSpecification {
     private final UserRepository userRepository;
     private final PublisherRepository publisherRepository;
     private final TwitterService twitterService;
+    private final MapstructMapper mapstructMapper;
 
     public List<Long> getPublisher(List<Long> publisherIds, String lang){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -96,50 +98,29 @@ public class HomeService implements BaseSpecification {
         return PageHolderUtils.getResponseEntityGenericPage(page,size,customCategoryDtos);
     }
 
-    private CustomCategoryDto setArticles(Category category, String lang,
+    private CustomCategoryDto setArticles(CategoryEntity category, String lang,
                                           List<Long> publisherIds, LocalDateTime fromDate, LocalDateTime toDate, Boolean isAccessible) {
         // TODO Limit 1, Publishers included, Rated
         if (publisherIds == null || publisherIds.isEmpty()) {
             publisherIds = publisherRepository.findByLang(lang).stream().map(AbstractEntity::getId).collect(Collectors.toList());
         }
         Long categoryId = category.getId();
-        CustomRatedArticle article = articleRepository.retrieveArticlesByCategoryIdsAndPublisherIdsAndLanguageAndLimit(categoryId,publisherIds,lang,fromDate,toDate,isAccessible);
+        CustomRatedArticle article = articleRepository.retrieveOneRatedArticleByCategoryIdsAndPublisherIdsAndLanguageAndLimit(categoryId,publisherIds,lang,fromDate,toDate,isAccessible);
         CustomCategoryDto customCategoryDto = new CustomCategoryDto();
         if(article != null){
             CustomRatedArticleDto customRatedArticleDto = new CustomRatedArticleDto();
             twitterService.setReplyCount(customRatedArticleDto);
             BeanUtils.copyProperties(article, customRatedArticleDto);
             if (article.getCountComment() == null) {
-                customRatedArticleDto.setCount_comment(0);
+                customRatedArticleDto.setCountComment(0);
             }
             customCategoryDto.setArticle(customRatedArticleDto);
         } else {
-            CustomRatedArticle article2 = articleRepository.nQSelectLatestArticle(categoryId);
+            CustomRatedArticle article2 = articleRepository.retrieveLatestArticleOfCategory(categoryId);
             if(article2 == null) {
                 customCategoryDto.setArticle(null);
             }else{
-                // Use Builder method, write custom in the DTO Object, this way it should work?!
-                // What is happening here? TwitterService.setReplyCount(customRatedArticleDto);
-                // TODO Use Mapper Class here maybe? Will Reduce the Code by a lot
-                CustomRatedArticleDto customRatedArticleDto = CustomRatedArticleDto.builder()
-                        .author(article2.getAuthor())
-                        .title(article2.getTitle())
-                        .description(article2.getDescription())
-                        .url(article2.getUrl())
-                        .article_id(article2.getArticleId())
-                        .url_to_image(article2.getUrlToImage())
-                        .published_at(article2.getPublishedAt())
-                        .is_accessible(article2.getIsAccessible())
-                        .publisher_name(article2.getPublisherName())
-                        .publisher_id(article2.getPublisherId())
-                        .count_comment(article2.getCountComment())
-                        .category_id(article2.getCategoryId())
-                        .category_name(article2.getCategoryName())
-                        .isRated(false)
-                        .scale_image(article2.getScaleImage())
-                        .build();
-
-                customCategoryDto.setArticle(customRatedArticleDto);
+                customCategoryDto.setArticle(mapstructMapper.customRatedArticleToCustomRatedArticleDto(article2));
             }
         }
 
@@ -148,14 +129,14 @@ public class HomeService implements BaseSpecification {
     }
 
     private boolean doesNotContainAnyCategoriesFromLang(List<Long> listCategoryIds, String lang) {
-        for(Category category:categoryRepository.findByLang(lang)){
+        for(CategoryEntity category:categoryRepository.findByLang(lang)){
             if(listCategoryIds.contains(category.getId())) return false;
         }
         return true;
     }
 
     private boolean doesNotContainAnyPublishersFromLang(List<Long> listPublisherIds, String lang) {
-        for (Publisher publisher : publisherRepository.findByLang(lang)) {
+        for (PublisherEntity publisher : publisherRepository.findByLang(lang)) {
             if (listPublisherIds.contains(publisher.getId())) return false;
         }
         return true;

@@ -3,7 +3,7 @@ package org.comppress.customnewsapi.service.category;
 import org.comppress.customnewsapi.dto.CategoryDto;
 import org.comppress.customnewsapi.dto.CategoryUserDto;
 import org.comppress.customnewsapi.dto.GenericPage;
-import org.comppress.customnewsapi.entity.Category;
+import org.comppress.customnewsapi.entity.CategoryEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
 import org.comppress.customnewsapi.mapper.MapstructMapper;
 import org.comppress.customnewsapi.repository.CategoryRepository;
@@ -39,7 +39,7 @@ public class CategoryService {
     }
 
     public ResponseEntity<GenericPage<CategoryDto>> getCategories(String lang, int page, int size) {
-        Page<Category> categoryPage = categoryRepository.findByLang(lang, PageRequest.of(page, size));
+        Page<CategoryEntity> categoryPage = categoryRepository.findByLang(lang, PageRequest.of(page, size));
 
         GenericPage<CategoryDto> genericPage = new GenericPage<>();
         genericPage.setData(categoryPage.stream().map(category -> mapstructMapper.categoryToCategoryDto(category)).collect(Collectors.toList()));
@@ -54,9 +54,9 @@ public class CategoryService {
         UserEntity userEntity = userRepository.findByUsernameAndDeletedFalse(authentication.getName());
 
         if(userEntity.getListCategoryIds() == null || userEntity.getListCategoryIds().isEmpty() || doesNotContainAnyCategoriesFromLang(userEntity.getListCategoryIds(),lang)){
-            Page<Category> categoryPage = categoryRepository.findByLang(lang,PageRequest.of(page, size));
+            Page<CategoryEntity> categoryPage = categoryRepository.findByLang(lang,PageRequest.of(page, size));
             List<CategoryUserDto> categoryUserDtoList = new ArrayList<>();
-            for(Category category:categoryPage.toList()){
+            for(CategoryEntity category:categoryPage.toList()){
                 CategoryUserDto categoryUserDto = new CategoryUserDto();
                 BeanUtils.copyProperties(category,categoryUserDto);
                 categoryUserDto.setSelected(true);
@@ -70,7 +70,7 @@ public class CategoryService {
         } else {
             List<Long> categoryIdList =  Stream.of(userEntity.getListCategoryIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
             List<CategoryUserDto> categoryUserDtoList = new ArrayList<>();
-            for (Category category:categoryRepository.findByLang(lang)){
+            for (CategoryEntity category:categoryRepository.findByLang(lang)){
                 CategoryUserDto categoryUserDto = new CategoryUserDto();
                 BeanUtils.copyProperties(category,categoryUserDto);
                 if (categoryIdList.contains(category.getId())) {
@@ -87,7 +87,7 @@ public class CategoryService {
 
     private boolean doesNotContainAnyCategoriesFromLang(String listCategoryIds, String lang) {
         List<Long> categoryIdList =  Stream.of(listCategoryIds.split(",")).map(Long::parseLong).collect(Collectors.toList());;
-        for(Category category:categoryRepository.findByLang(lang)){
+        for(CategoryEntity category:categoryRepository.findByLang(lang)){
             if(categoryIdList.contains(category.getId())) return false;
         }
         return true;

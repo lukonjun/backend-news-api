@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.repository.article;
+package org.comppress.customnewsapi.entity.article;
 
 public interface Article {
     Long getId();
@@ -9,5 +9,8 @@ public interface Article {
     String getUrlToImage();
     String getPublishedAt();
     Integer getCountRatings();
+    Integer getCountComment();
     Boolean getIsAccessible();
+    Boolean getScaleImage();
+    Boolean getIsRated();
 }

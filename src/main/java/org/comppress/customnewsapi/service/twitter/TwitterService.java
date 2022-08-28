@@ -4,10 +4,10 @@ import io.github.redouane59.twitter.TwitterClient;
 import io.github.redouane59.twitter.dto.tweet.Tweet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.comppress.customnewsapi.dto.CustomRatedArticleDto;
+import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
 import org.comppress.customnewsapi.dto.TwitterArticleDto;
-import org.comppress.customnewsapi.entity.Article;
-import org.comppress.customnewsapi.entity.TwitterTweet;
+import org.comppress.customnewsapi.entity.ArticleEntity;
+import org.comppress.customnewsapi.entity.TwitterTweetEntity;
 import org.comppress.customnewsapi.mapper.TwitterMapper;
 import org.comppress.customnewsapi.repository.ArticleRepository;
 import org.comppress.customnewsapi.repository.TwitterRepository;
@@ -39,7 +39,7 @@ public class TwitterService {
 
     public ResponseEntity<TwitterArticleDto> getTwitterArticle(Long id) {
 
-        TwitterTweet twitterTweet = null;
+        TwitterTweetEntity twitterTweet = null;
         if((twitterTweet = twitterRepository.findByArticleId(id)) != null){
             TwitterArticleDto twitterArticleDto = twitterMapper.twitterArticleToTwitterArticleDto(twitterTweet);
             return ResponseEntity.status(HttpStatus.OK).body(twitterArticleDto);
@@ -51,7 +51,7 @@ public class TwitterService {
             // Create Article against Twitter API
 
             Twitter twitterApi = twitter;
-            Optional<Article> article = articleRepository.findById(id);
+            Optional<ArticleEntity> article = articleRepository.findById(id);
             Status status = null;
             try {
                 status = twitterApi.updateStatus("Hello Test URL " + article.get().getUrl());
@@ -67,7 +67,7 @@ public class TwitterService {
             User user = status.getUser();
             String URL = "https://twitter.com/" + user.getScreenName() +"/status/" + status.getId();
             log.info(URL);
-            twitterTweet = new TwitterTweet().builder()
+            twitterTweet = new TwitterTweetEntity().builder()
                     .articleId(id)
                     .twitterId(status.getId())
                     .twitterArticleUrl(URL)
@@ -92,11 +92,11 @@ public class TwitterService {
     }
 
     public void setReplyCount(CustomRatedArticleDto articleDto) {
-        TwitterTweet tweet = twitterRepository.findByArticleId(articleDto.getArticle_id());
+        TwitterTweetEntity tweet = twitterRepository.findByArticleId(articleDto.getId());
         if(tweet == null){
-            articleDto.setCount_comment(0);
+            articleDto.setCountComment(0);
         }else{
-            articleDto.setCount_comment(tweet.getReplyCount());
+            articleDto.setCountComment(tweet.getReplyCount());
         }
     }
 }

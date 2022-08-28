@@ -5,24 +5,27 @@ import com.rometools.modules.mediarss.MediaEntryModule;
 import com.rometools.modules.mediarss.MediaModule;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
-import com.rometools.rome.feed.synd.SyndFeedImpl;
 import com.rometools.rome.io.ParsingFeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.comppress.customnewsapi.dto.CustomArticleDto;
-import org.comppress.customnewsapi.dto.CustomRatedArticleDto;
 import org.comppress.customnewsapi.dto.GenericPage;
-import org.comppress.customnewsapi.entity.*;
+import org.comppress.customnewsapi.dto.article.CustomArticleDto;
+import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
+import org.comppress.customnewsapi.entity.ArticleEntity;
+import org.comppress.customnewsapi.entity.PublisherEntity;
+import org.comppress.customnewsapi.entity.RssFeedEntity;
+import org.comppress.customnewsapi.entity.UserEntity;
+import org.comppress.customnewsapi.entity.article.CustomArticle;
+import org.comppress.customnewsapi.entity.article.CustomRatedArticle;
 import org.comppress.customnewsapi.exceptions.AuthenticationException;
+import org.comppress.customnewsapi.mapper.MapstructMapper;
 import org.comppress.customnewsapi.repository.*;
-import org.comppress.customnewsapi.repository.article.CustomArticle;
-import org.comppress.customnewsapi.repository.article.CustomRatedArticle;
 import org.comppress.customnewsapi.utils.CustomStringUtils;
 import org.comppress.customnewsapi.utils.DateUtils;
 import org.comppress.customnewsapi.utils.PageHolderUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -61,6 +64,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ArticleService {
 
     @Value("${image.width}")
@@ -74,46 +78,11 @@ public class ArticleService {
     private final PublisherRepository publisherRepository;
     private final UserRepository userRepository;
     private final RatingRepository ratingRepository;
-
-    @Autowired
-    public ArticleService(RssFeedRepository rssFeedRepository, ArticleRepository articleRepository, PublisherRepository publisherRepository, UserRepository userRepository, RatingRepository ratingRepository) {
-        this.rssFeedRepository = rssFeedRepository;
-        this.articleRepository = articleRepository;
-        this.publisherRepository = publisherRepository;
-        this.userRepository = userRepository;
-        this.ratingRepository = ratingRepository;
-    }
-
-    public List<Article> fetchArticlesFromTopNewsFeed(TopNewsFeed topNewsFeed) {
-        List<Article> articles = new ArrayList<>();
-
-        SyndFeed feed = new SyndFeedImpl();
-        try {
-            URL feedSource = new URL(topNewsFeed.getUrl());
-            SyndFeedInput input = new SyndFeedInput();
-            feed = input.build(new XmlReader(feedSource));
-            log.info("Fetching News from " + topNewsFeed.getUrl());
-        } catch (ParsingFeedException e) {
-            log.error("Feed can not be parsed, please recheck the url {}", topNewsFeed.getUrl(), e);
-            return null;
-        } catch (FileNotFoundException e) {
-            log.error("FileNotFoundException most likely a dead link, check the url " + topNewsFeed.getUrl());
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        for (SyndEntry syndEntry : feed.getEntries()) {
-            Article article = customMappingSyndEntryImplToArticle(syndEntry, null);
-            articles.add(article);
-        }
-
-        return articles;
-    }
+    private final MapstructMapper mapstructMapper;
 
     public void fetchArticlesFromRssFeeds() {
 
-        for (RssFeed rssFeed : rssFeedRepository.findAll()) {
+        for (RssFeedEntity rssFeed : rssFeedRepository.findAll()) {
             SyndFeed feed;
             try {
                 URL feedSource = new URL(rssFeed.getUrl());
@@ -147,9 +116,9 @@ public class ArticleService {
         }
     }
 
-    private void saveArticle(RssFeed rssFeed, SyndFeed feed) {
+    private void saveArticle(RssFeedEntity rssFeed, SyndFeed feed) {
         for (SyndEntry syndEntry : feed.getEntries()) {
-            Article article = customMappingSyndEntryImplToArticle(syndEntry, rssFeed);
+            ArticleEntity article = customMappingSyndEntryImplToArticle(syndEntry, rssFeed);
             if (articleRepository.findByGuid(article.getGuid()).isPresent()) continue;
             try {
                 articleRepository.save(article);
@@ -162,7 +131,7 @@ public class ArticleService {
     }
 
     @Async("ThreadPoolExecutor")
-    public void update(Article article) throws URISyntaxException, IOException {
+    public void update(ArticleEntity article) throws URISyntaxException, IOException {
         try {
             String response = urlReader(article.getUrl());
             if(response == null){
@@ -196,8 +165,8 @@ public class ArticleService {
         return text;
     }
 
-    public Article customMappingSyndEntryImplToArticle(SyndEntry syndEntry, RssFeed rssFeed) {
-        Article article = new Article();
+    public ArticleEntity customMappingSyndEntryImplToArticle(SyndEntry syndEntry, RssFeedEntity rssFeed) {
+        ArticleEntity article = new ArticleEntity();
         if (syndEntry.getAuthor() != null) {
             article.setAuthor(syndEntry.getAuthor());
         }
@@ -244,7 +213,7 @@ public class ArticleService {
 
             if(rssFeed != null){
                 if (imgUrl == null || imgUrl.isEmpty() || isBadResolution) {
-                    Optional<Publisher> publisher = publisherRepository.findById(rssFeed.getPublisherId());
+                    Optional<PublisherEntity> publisher = publisherRepository.findById(rssFeed.getPublisherId());
                     article.setUrlToImage(publisher.get().getUrlToImage());
                     article.setScaleImage(true);
                 } else {
@@ -321,24 +290,13 @@ public class ArticleService {
                         PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
 
         GenericPage<CustomArticleDto> genericPage = new GenericPage<>();
-        genericPage.setData(articlesPage.stream().map(this::toCustomDto).collect(Collectors.toList()));
-        //genericPage.setData(articlesPage.stream().map(a -> this.toCustomDto(a)).collect(Collectors.toList()));
+        genericPage.setData(articlesPage.stream().map(mapstructMapper::customArticleToCustomArticleDto).collect(Collectors.toList()));
+
+        // TODO Rewrite this with MapStruct instead of copyProperties?
         BeanUtils.copyProperties(articlesPage, genericPage);
 
         return ResponseEntity.status(HttpStatus.OK).body(genericPage);
 
-    }
-
-    private CustomArticleDto toCustomDto(CustomArticle s) {
-        CustomArticleDto dto = new CustomArticleDto();
-        BeanUtils.copyProperties(s, dto);
-        return dto;
-    }
-
-    private CustomArticleDto toCustomDto(CustomArticleEntity s) {
-        CustomArticleDto dto = new CustomArticleDto();
-        BeanUtils.copyProperties(s, dto);
-        return dto;
     }
 
     public ResponseEntity<GenericPage> getRatedArticles(int page, int size, Long categoryId,
@@ -365,7 +323,7 @@ public class ArticleService {
         }
 
         if (listPublisherIds == null) {
-            listPublisherIds = publisherRepository.findAll().stream().map(Publisher::getId).collect(Collectors.toList());
+            listPublisherIds = publisherRepository.findAll().stream().map(PublisherEntity::getId).collect(Collectors.toList());
         }
         List<CustomRatedArticle> customRatedArticleList = articleRepository.retrieveAllRatedArticlesInDescOrder(
                 categoryId, listPublisherIds, lang,
@@ -386,11 +344,11 @@ public class ArticleService {
         // Check if has been rated
         for(CustomRatedArticleDto articleDto:customRatedArticleDtoList){
             if(userEntity != null){
-                if(!ratingRepository.findByUserIdAndArticleId(userEntity.getId(),articleDto.getArticle_id()).isEmpty()){
+                if(!ratingRepository.findByUserIdAndArticleId(userEntity.getId(),articleDto.getId()).isEmpty()){
                     articleDto.setIsRated(true);
                 }
             }else{
-                if(!ratingRepository.findByGuidAndArticleId(guid, articleDto.getArticle_id()).isEmpty()){
+                if(!ratingRepository.findByGuidAndArticleId(guid, articleDto.getId()).isEmpty()){
                     articleDto.setIsRated(true);
                 }
             }
@@ -402,12 +360,12 @@ public class ArticleService {
 
     public ResponseEntity<GenericPage<CustomArticleDto>> getArticlesNotRated(int page, int size, Long categoryId, List<Long> listPublisherIds, String lang, Boolean isAccessible, String fromDate, String toDate, Boolean topFeed) {
         if (listPublisherIds == null) {
-            listPublisherIds = publisherRepository.findAll().stream().map(Publisher::getId).collect(Collectors.toList());
+            listPublisherIds = publisherRepository.findAll().stream().map(PublisherEntity::getId).collect(Collectors.toList());
         }
         Page<CustomArticle> articlesPage = articleRepository.retrieveUnratedArticlesByCategoryIdAndPublisherIdsAndLanguage(categoryId, listPublisherIds, lang, isAccessible, DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), topFeed,PageRequest.of(page, size));
 
         GenericPage<CustomArticleDto> genericPage = new GenericPage<>();
-        genericPage.setData(articlesPage.stream().map(this::toCustomDto).collect(Collectors.toList()));
+        genericPage.setData(articlesPage.stream().map(a -> mapstructMapper.customArticleToCustomArticleDto(a)).collect(Collectors.toList()));
         BeanUtils.copyProperties(articlesPage, genericPage);
 
         return ResponseEntity.status(HttpStatus.OK).body(genericPage);
@@ -449,7 +407,7 @@ public class ArticleService {
             CustomRatedArticleDto customRatedArticleDto = new CustomRatedArticleDto();
             BeanUtils.copyProperties(customRatedArticle, customRatedArticleDto);
             if (customRatedArticle.getCountComment() == null) {
-                customRatedArticleDto.setCount_comment(0);
+                customRatedArticleDto.setCountComment(0);
             }
             customRatedArticleDtoList.add(customRatedArticleDto);
         });

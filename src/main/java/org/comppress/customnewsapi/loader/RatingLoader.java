@@ -1,16 +1,11 @@
 package org.comppress.customnewsapi.loader;
 
 import lombok.extern.slf4j.Slf4j;
-import org.comppress.customnewsapi.entity.Article;
-import org.comppress.customnewsapi.entity.Rating;
 import org.comppress.customnewsapi.repository.ArticleRepository;
 import org.comppress.customnewsapi.repository.RatingRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Random;
 
 @Component
 @Slf4j

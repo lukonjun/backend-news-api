@@ -1,5 +1,6 @@
 package org.comppress.customnewsapi.service.fileupload;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -7,13 +8,16 @@ import org.apache.commons.csv.CSVRecord;
 import org.comppress.customnewsapi.dto.CategoryDto;
 import org.comppress.customnewsapi.dto.CriteriaDto;
 import org.comppress.customnewsapi.dto.PublisherDto;
-import org.comppress.customnewsapi.dto.TopNewsFeedDto;
-import org.comppress.customnewsapi.entity.*;
+import org.comppress.customnewsapi.entity.CategoryEntity;
+import org.comppress.customnewsapi.entity.CriteriaEntity;
+import org.comppress.customnewsapi.entity.PublisherEntity;
+import org.comppress.customnewsapi.entity.RssFeedEntity;
 import org.comppress.customnewsapi.exceptions.FileImportException;
-import org.comppress.customnewsapi.exceptions.PublisherDoesNotExistException;
-import org.comppress.customnewsapi.repository.*;
+import org.comppress.customnewsapi.repository.CategoryRepository;
+import org.comppress.customnewsapi.repository.CriteriaRepository;
+import org.comppress.customnewsapi.repository.PublisherRepository;
+import org.comppress.customnewsapi.repository.RssFeedRepository;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,7 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FileUploadService {
 
     private final int TOP_NEWS_PUBLISHER = 0;
@@ -53,27 +58,17 @@ public class FileUploadService {
     private final PublisherRepository publisherRepository;
     private final CategoryRepository categoryRepository;
     private final CriteriaRepository criteriaRepository;
-    private final TopNewsFeedRepository topNewsFeedRepository;
-
-    @Autowired
-    public FileUploadService(RssFeedRepository rssFeedRepository, PublisherRepository publisherRepository, CategoryRepository categoryRepository, CriteriaRepository criteriaRepository, TopNewsFeedRepository topNewsFeedRepository) {
-        this.rssFeedRepository = rssFeedRepository;
-        this.publisherRepository = publisherRepository;
-        this.categoryRepository = categoryRepository;
-        this.criteriaRepository = criteriaRepository;
-        this.topNewsFeedRepository = topNewsFeedRepository;
-    }
 
     @Transactional
-    public ResponseEntity<List<RssFeed>> saveRssFeeds(MultipartFile file) throws Exception {
+    public ResponseEntity<List<RssFeedEntity>> saveRssFeeds(MultipartFile file) throws Exception {
 
         log.info("LINKS IMPORT CSV IS PROCESSING {}", file.getName());
 
         List<CSVRecord> csvRecordList = getRecords(file);
-        List<RssFeed> rssFeedList = getRssFeeds(csvRecordList);
-        List<RssFeed> finalRssFeedList = new ArrayList<>();
+        List<RssFeedEntity> rssFeedList = getRssFeeds(csvRecordList);
+        List<RssFeedEntity> finalRssFeedList = new ArrayList<>();
         // TODO Also update Feeds
-        for (RssFeed rssFeed : rssFeedList) {
+        for (RssFeedEntity rssFeed : rssFeedList) {
             if (rssFeedRepository.findByUrl(rssFeed.getUrl()).isEmpty()) finalRssFeedList.add(rssFeed);
         }
         try {
@@ -95,16 +90,16 @@ public class FileUploadService {
         }
     }
 
-    private List<RssFeed> getRssFeeds(List<CSVRecord> csvRecordList) throws Exception {
-        List<RssFeed> rssFeedList = new ArrayList<>();
+    private List<RssFeedEntity> getRssFeeds(List<CSVRecord> csvRecordList) throws Exception {
+        List<RssFeedEntity> rssFeedList = new ArrayList<>();
 
         for (CSVRecord record : csvRecordList) {
-            Publisher publisher = publisherRepository.findByName(record.get(RSS_FEED_SOURCE));
+            PublisherEntity publisher = publisherRepository.findByName(record.get(RSS_FEED_SOURCE));
             if (publisher == null) {
-                publisher = new Publisher(record.get(RSS_FEED_SOURCE),record.get(RSS_FEED_LANG),"");
+                publisher = new PublisherEntity(record.get(RSS_FEED_SOURCE),record.get(RSS_FEED_LANG),"");
                 publisherRepository.save(publisher);
             }
-            Category category = categoryRepository.findByNameAndLang(record.get(RSS_FEED_CATEGORY),record.get(RSS_FEED_LANG));
+            CategoryEntity category = categoryRepository.findByNameAndLang(record.get(RSS_FEED_CATEGORY),record.get(RSS_FEED_LANG));
             if (category == null) {
                 throw new RuntimeException("Category should not be null during import "+record.get(RSS_FEED_CATEGORY) + " : " + record.get(RSS_FEED_LANG)+
                         "call /category before"
@@ -114,7 +109,7 @@ public class FileUploadService {
                 categoryRepository.save(category);
                  */
             }
-            rssFeedList.add(RssFeed.builder()
+            rssFeedList.add(RssFeedEntity.builder()
                     .publisherId(publisher.getId())
                     .categoryId(category.getId())
                     .lang(record.get(RSS_FEED_LANG))
@@ -133,7 +128,7 @@ public class FileUploadService {
             if(criteriaRepository.existsById(Long.parseLong(csvRecord.get(CRITERIA_ID)))){
                 continue;
             }
-            Criteria criteria = new Criteria();
+            CriteriaEntity criteria = new CriteriaEntity();
             criteria.setId(Long.parseLong(csvRecord.get(CRITERIA_ID)));
             criteria.setName(csvRecord.get(CRITERIA_NAME));
             criteriaRepository.save(criteria);
@@ -150,7 +145,7 @@ public class FileUploadService {
         List<CSVRecord> csvRecordList = getRecords(file);
         List<PublisherDto> publisherDtoList = new ArrayList<>();
         for(CSVRecord csvRecord:csvRecordList){
-            Publisher publisher = publisherRepository.findByName(csvRecord.get(PUBLISHER_NAME));
+            PublisherEntity publisher = publisherRepository.findByName(csvRecord.get(PUBLISHER_NAME));
             if(publisher != null){
                 publisher.setUrlToImage(csvRecord.get(PUBLISHER_SVG_URL));
                 publisherRepository.save(publisher);
@@ -160,31 +155,6 @@ public class FileUploadService {
             }
         }
         return ResponseEntity.ok().body(publisherDtoList);
-    }
-
-    public ResponseEntity<List<TopNewsFeedDto>> saveTopNews(MultipartFile file) {
-        log.info("LINKS IMPORT CSV IS PROCESSING {}", file.getName());
-
-        List<CSVRecord> csvRecordList = getRecords(file);
-        List<TopNewsFeedDto> topNewsFeedDtos = new ArrayList<>();
-        for(CSVRecord csvRecord:csvRecordList){
-            if(!topNewsFeedRepository.existsByUrl(csvRecord.get(TOP_NEWS_LINK))){
-                TopNewsFeed topNewsFeed = new TopNewsFeed();
-                topNewsFeed.setLang(csvRecord.get(TOP_NEWS_LANG));
-                topNewsFeed.setUrl(csvRecord.get(TOP_NEWS_LINK));
-                Publisher publisher = publisherRepository.findByName(csvRecord.get(TOP_NEWS_PUBLISHER));
-                if(publisher != null){
-                    topNewsFeed.setPublisherId(publisher.getId());
-                }else{
-                    throw new PublisherDoesNotExistException("Publisher does not exist", csvRecord.get(TOP_NEWS_PUBLISHER));
-                }
-                topNewsFeedRepository.save(topNewsFeed);
-                TopNewsFeedDto topNewsFeedDto = new TopNewsFeedDto();
-                BeanUtils.copyProperties(topNewsFeed,topNewsFeedDto);
-                topNewsFeedDtos.add(topNewsFeedDto);
-            }
-        }
-        return ResponseEntity.ok().body(topNewsFeedDtos);
     }
 
     /**
@@ -200,7 +170,7 @@ public class FileUploadService {
         List<CategoryDto> categoryDtoList = new ArrayList<>();
         for(CSVRecord csvRecord:csvRecordList){
             if(categoryRepository.findByNameAndLang(csvRecord.get(CATEGORY_NAME),csvRecord.get(CATEGORY_LANG)) == null){
-                Category category = new Category();
+                CategoryEntity category = new CategoryEntity();
                 category.setName(csvRecord.get(CATEGORY_NAME));
                 category.setLang(csvRecord.get(CATEGORY_LANG));
                 category.setUrlToImage(csvRecord.get(CATEGORY_IMG_URL));

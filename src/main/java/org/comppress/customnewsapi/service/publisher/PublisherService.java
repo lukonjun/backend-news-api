@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.dto.PublisherDto;
 import org.comppress.customnewsapi.dto.PublisherUserDto;
-import org.comppress.customnewsapi.entity.Publisher;
+import org.comppress.customnewsapi.entity.PublisherEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
 import org.comppress.customnewsapi.mapper.MapstructMapper;
 import org.comppress.customnewsapi.repository.PublisherRepository;
@@ -34,7 +34,7 @@ public class PublisherService {
 
 
     public ResponseEntity<GenericPage<PublisherDto>> getPublisher(String lang, int page, int size) {
-        Page<Publisher> publisherPage = publisherRepository.findByLang(lang, PageRequest.of(page, size));
+        Page<PublisherEntity> publisherPage = publisherRepository.findByLang(lang, PageRequest.of(page, size));
 
         GenericPage<PublisherDto> genericPage = new GenericPage<>();
         genericPage.setData(publisherPage.stream().map(publisher -> mapstructMapper.publisherToPublisherDto(publisher)).collect(Collectors.toList()));
@@ -47,9 +47,9 @@ public class PublisherService {
         UserEntity userEntity = userRepository.findByUsernameAndDeletedFalse(authentication.getName());
 
         if (userEntity.getListCategoryIds() == null || userEntity.getListCategoryIds().isEmpty() || doesNotContainAnyPublishersFromLang(userEntity.getListPublisherIds(), lang)) {
-            Page<Publisher> publisherPage = publisherRepository.findByLang(lang, PageRequest.of(page, size));
+            Page<PublisherEntity> publisherPage = publisherRepository.findByLang(lang, PageRequest.of(page, size));
             List<PublisherUserDto> publisherUserDtoList = new ArrayList<>();
-            for (Publisher publisher : publisherPage.toList()) {
+            for (PublisherEntity publisher : publisherPage.toList()) {
                 PublisherUserDto publisherUserDto = new PublisherUserDto();
                 BeanUtils.copyProperties(publisher, publisherUserDto);
                 publisherUserDto.setSelected(true);
@@ -63,7 +63,7 @@ public class PublisherService {
         } else {
             List<Long> publisherIdList = Stream.of(userEntity.getListPublisherIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
             List<PublisherUserDto> publisherUserDtoList = new ArrayList<>();
-            for (Publisher publisher : publisherRepository.findByLang(lang)) {
+            for (PublisherEntity publisher : publisherRepository.findByLang(lang)) {
                 PublisherUserDto publisherUserDto = new PublisherUserDto();
                 BeanUtils.copyProperties(publisher, publisherUserDto);
                 if (publisherIdList.contains(publisher.getId())) {
@@ -80,7 +80,7 @@ public class PublisherService {
 
     private boolean doesNotContainAnyPublishersFromLang(String listPublisherIds, String lang) {
         List<Long> publisherIdList = Stream.of(listPublisherIds.split(",")).map(Long::parseLong).collect(Collectors.toList());
-        for (Publisher publisher : publisherRepository.findByLang(lang)) {
+        for (PublisherEntity publisher : publisherRepository.findByLang(lang)) {
             if (publisherIdList.contains(publisher.getId())) return false;
         }
         return true;

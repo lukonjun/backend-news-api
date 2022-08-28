@@ -13,7 +13,6 @@ import javax.persistence.*;
 public class UserEntity extends AbstractEntity implements Transformer {
 
     private String name;
-//    @Column(unique = true)
     private String email;
     private String username;
     private String password;

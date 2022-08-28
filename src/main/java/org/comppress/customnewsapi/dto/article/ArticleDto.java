@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.dto;
+package org.comppress.customnewsapi.dto.article;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -19,9 +19,13 @@ public class ArticleDto {
     private LocalDateTime publishedAt;
     @JsonProperty(value = "count_ratings")
     private Integer countRatings;
+    @JsonProperty(value = "count_comment")
+    private Integer countComment;
     @JsonProperty(value = "is_accessible")
     private boolean isAccessible;
     @JsonProperty(value = "scale_image")
     private boolean scaleImage;
+    @JsonProperty("is_rated")
+    private Boolean isRated;
 
 }

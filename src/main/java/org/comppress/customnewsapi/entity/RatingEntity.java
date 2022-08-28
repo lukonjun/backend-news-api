@@ -12,12 +12,12 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Data
-@Table(indexes = @Index(columnList = "articleId,criteriaId"))
+@Table(name = "rating", indexes = @Index(columnList = "articleId,criteriaId"))
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Rating extends AbstractEntity{
+public class RatingEntity extends AbstractEntity{
 
     private Long criteriaId;
     private Long userId;

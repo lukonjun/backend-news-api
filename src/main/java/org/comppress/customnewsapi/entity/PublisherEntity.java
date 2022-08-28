@@ -6,12 +6,14 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Publisher extends AbstractEntity {
+@Table(name = "publisher")
+public class PublisherEntity extends AbstractEntity {
 
     @Column(unique = true)
     String name;

@@ -2,7 +2,7 @@ package org.comppress.customnewsapi.service.criteria;
 
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.CriteriaDto;
-import org.comppress.customnewsapi.entity.Criteria;
+import org.comppress.customnewsapi.entity.CriteriaEntity;
 import org.comppress.customnewsapi.mapper.MapstructMapper;
 import org.comppress.customnewsapi.repository.CriteriaRepository;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class CriteriaService {
 
     public List<CriteriaDto> getCriteria() {
         List<CriteriaDto> criteriaDtoList = new ArrayList<>();
-        for(Criteria criteria:criteriaRepository.findAll()){
+        for(CriteriaEntity criteria:criteriaRepository.findAll()){
             criteriaDtoList.add(mapstructMapper.criteriaToCriteriaDto(criteria));
         }
         return criteriaDtoList;

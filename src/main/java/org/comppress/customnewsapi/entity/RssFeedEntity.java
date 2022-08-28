@@ -11,14 +11,14 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Data
-@Table(indexes = {
+@Table(name = "rss_feed", indexes = {
         @Index(columnList = "lang")
 })
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Builder
-public class RssFeed extends AbstractEntity{
+public class RssFeedEntity extends AbstractEntity{
 
     @Column(unique = true, nullable = false)
     private String url;

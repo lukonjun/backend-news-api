@@ -1,21 +1,22 @@
 package org.comppress.customnewsapi.entity;
 
 import lombok.Data;
-import org.comppress.customnewsapi.dto.ArticleDto;
-import org.springframework.beans.BeanUtils;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(indexes = {
+@Table(name = "article", indexes = {
         @Index(columnList = "publishedAt"),
         @Index(columnList = "isAccessible"),
         @Index(columnList = "rssFeedId"),
         @Index(columnList = "countRatings")
 })
-public class Article extends AbstractEntity{
+public class ArticleEntity extends AbstractEntity{
 
     private String author;
     private String title;
@@ -37,11 +38,5 @@ public class Article extends AbstractEntity{
     private boolean isAccessibleUpdated = false;
     private boolean isTopNews = false;
     private boolean scaleImage = false;
-
-    public ArticleDto toDto(){
-        ArticleDto articleDto = new ArticleDto();
-        BeanUtils.copyProperties(this, articleDto);
-        return articleDto;
-    }
 
 }

@@ -1,12 +1,12 @@
 package org.comppress.customnewsapi.mapper;
 
-import org.comppress.customnewsapi.dto.PublisherDto;
-import org.comppress.customnewsapi.dto.CategoryDto;
-import org.comppress.customnewsapi.dto.CriteriaDto;
-import org.comppress.customnewsapi.dto.RatingDto;
-import org.comppress.customnewsapi.dto.SubmitRatingDto;
+import org.comppress.customnewsapi.dto.*;
+import org.comppress.customnewsapi.dto.article.CustomArticleDto;
+import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
 import org.comppress.customnewsapi.dto.xml.ItemDto;
 import org.comppress.customnewsapi.entity.*;
+import org.comppress.customnewsapi.entity.article.CustomArticle;
+import org.comppress.customnewsapi.entity.article.CustomRatedArticle;
 import org.mapstruct.Mapper;
 import org.mapstruct.MapperConfig;
 import org.mapstruct.Mapping;
@@ -22,13 +22,19 @@ public interface MapstructMapper {
     @Mapping(source = "enclosure.url", target = "urlToImage")
     @Mapping(source = "encoded", target = "content")
     @Mapping(source = "pubDate", target = "publishedAt")
-    Article itemDtoToArticle(ItemDto itemDto);
+    ArticleEntity itemDtoToArticle(ItemDto itemDto);
 
-    Rating submitRatingDtoToRating(SubmitRatingDto submitRatingDto);
-    RatingDto ratingToRatingDto(Rating rating);
+    RatingEntity submitRatingDtoToRating(SubmitRatingDto submitRatingDto);
+    RatingDto ratingToRatingDto(RatingEntity rating);
 
-    CriteriaDto criteriaToCriteriaDto(Criteria criteria);
-    CategoryDto categoryToCategoryDto(Category category);
-    PublisherDto publisherToPublisherDto(Publisher publisher);
+    CriteriaDto criteriaToCriteriaDto(CriteriaEntity criteria);
+    CategoryDto categoryToCategoryDto(CategoryEntity category);
+    PublisherDto publisherToPublisherDto(PublisherEntity publisher);
+
+    @Mapping(source = "publishedAt", target = "publishedAt", dateFormat = "yyyy-MM-dd HH:mm:ss.S")
+    CustomRatedArticleDto customRatedArticleToCustomRatedArticleDto(CustomRatedArticle customRatedArticle);
+
+    @Mapping(source = "publishedAt", target = "publishedAt", dateFormat = "yyyy-MM-dd HH:mm:ss.S")
+    CustomArticleDto customArticleToCustomArticleDto(CustomArticle s);
 
 }

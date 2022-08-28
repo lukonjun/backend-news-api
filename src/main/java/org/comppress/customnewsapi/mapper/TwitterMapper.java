@@ -1,7 +1,7 @@
 package org.comppress.customnewsapi.mapper;
 
 import org.comppress.customnewsapi.dto.TwitterArticleDto;
-import org.comppress.customnewsapi.entity.TwitterTweet;
+import org.comppress.customnewsapi.entity.TwitterTweetEntity;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 @Mapper(componentModel = "spring")
 public interface TwitterMapper {
 
-    TwitterArticleDto twitterArticleToTwitterArticleDto(TwitterTweet twitterTweet);
+    TwitterArticleDto twitterArticleToTwitterArticleDto(TwitterTweetEntity twitterTweet);
 
 }
