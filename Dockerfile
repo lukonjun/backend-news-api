@@ -4,5 +4,6 @@ COPY target/application.jar /opt/
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN chown appuser:appgroup /opt/application.jar
 # Tell docker that all future commands should run as the appuser user
+
 USER appuser
 CMD ["java","-jar","/opt/application.jar"]
