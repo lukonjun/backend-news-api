@@ -14,7 +14,7 @@ spring:
         size: 3
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/new_2_comppress?allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://localhost:3306/comppress?allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8
     username: root
     password: secret
   jpa:
@@ -40,17 +40,17 @@ server:
     context-path: /custom-news-api
 scheduler:
   news-feed:
-    triggeringIntervalMilliSeconds: 40000
+    triggeringIntervalMilliSeconds: 300000
     initialDelayIntervalMilliSeconds: 5000
-    enabled: yes
+    enabled: no
   paywall:
-    triggeringIntervalMilliSeconds: 20000
-    initialDelayIntervalMilliSeconds: 4000
+    triggeringIntervalMilliSeconds: 600000
+    initialDelayIntervalMilliSeconds: 20000
     enabled: no
     page-size: 100
   twitter:
-    triggeringIntervalMilliSeconds: 60000
-    initialDelayIntervalMilliSeconds: 5000
+    triggeringIntervalMilliSeconds: 600000
+    initialDelayIntervalMilliSeconds: 15000
     enabled: no
 jwt:
   secret: secret
