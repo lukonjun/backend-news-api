@@ -12,5 +12,4 @@ public interface Article {
     Integer getCountComment();
     Boolean getIsAccessible();
     Boolean getScaleImage();
-    Boolean getIsRated();
 }

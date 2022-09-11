@@ -2,7 +2,6 @@ package org.comppress.customnewsapi.service.rating;
 
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.CriteriaRatingDto;
-import org.comppress.customnewsapi.dto.RatingDto;
 import org.comppress.customnewsapi.dto.SubmitRatingDto;
 import org.comppress.customnewsapi.dto.response.CreateRatingResponseDto;
 import org.comppress.customnewsapi.dto.response.ResponseDto;
@@ -35,13 +34,6 @@ public class RatingService {
     private final CriteriaRepository criteriaRepository;
     private final ArticleRepository articleRepository;
     private final AppAuthenticationService appAuthenticationService;
-
-    public List<RatingDto> getRatings() {
-        List<RatingEntity> ratingList = ratingRepository.findAll();
-        List<RatingDto> ratingDtoList = new ArrayList<>();
-        ratingList.stream().map(rating -> ratingDtoList.add(rating.toDto()));
-        return ratingDtoList;
-    }
 
     public ResponseEntity<ResponseDto> submitRating(SubmitRatingDto submitRatingDto, String guid) throws Exception, RatingIsInvalidException {
         UserEntity userEntity = null;
@@ -76,6 +68,11 @@ public class RatingService {
         }
         ratingRepository.saveAll(ratings);
         if(shouldUpdateRating){
+            return ResponseEntity.status(HttpStatus.CREATED).body(UpdateRatingResponseDto.builder()
+                    .message("Updated rating for article")
+                    .submitRatingDto(submitRatingDto)
+                    .build());
+        } else {
             Optional<ArticleEntity> article = articleRepository.findById(submitRatingDto.getArticleId());
             if (article.isPresent()) {
                 Integer countRatings = article.get().getCountRatings();
@@ -84,11 +81,6 @@ public class RatingService {
                 article.get().setCountRatings(countRatings);
                 articleRepository.save(article.get());
             }
-            return ResponseEntity.status(HttpStatus.CREATED).body(UpdateRatingResponseDto.builder()
-                    .message("Updated rating for article")
-                    .submitRatingDto(submitRatingDto)
-                    .build());
-        } else {
             return ResponseEntity.status(HttpStatus.CREATED).body(CreateRatingResponseDto.builder()
                     .message("Created rating for article")
                     .submitRatingDto(submitRatingDto)

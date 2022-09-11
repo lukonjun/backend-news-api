@@ -108,13 +108,9 @@ public class HomeService implements BaseSpecification {
         CustomRatedArticle article = articleRepository.retrieveOneRatedArticleByCategoryIdsAndPublisherIdsAndLanguageAndLimit(categoryId,publisherIds,lang,fromDate,toDate,isAccessible);
         CustomCategoryDto customCategoryDto = new CustomCategoryDto();
         if(article != null){
-            CustomRatedArticleDto customRatedArticleDto = new CustomRatedArticleDto();
-            twitterService.setReplyCount(customRatedArticleDto);
-            BeanUtils.copyProperties(article, customRatedArticleDto);
-            if (article.getCountComment() == null) {
-                customRatedArticleDto.setCountComment(0);
-            }
+            CustomRatedArticleDto customRatedArticleDto = mapstructMapper.customRatedArticleToCustomRatedArticleDto(article);
             customCategoryDto.setArticle(customRatedArticleDto);
+            twitterService.setReplyCount(customRatedArticleDto);
         } else {
             CustomRatedArticle article2 = articleRepository.retrieveLatestArticleOfCategory(categoryId);
             if(article2 == null) {

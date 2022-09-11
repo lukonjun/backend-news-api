@@ -94,7 +94,7 @@ public class ArticleService {
                 while ((output = br.readLine()) != null) {
                     sb.append(output);
                 }
-                System.out.println(sb);
+                // System.out.println(sb);
 
                 SyndFeedInput input = new SyndFeedInput();
                 feed = input.build(new XmlReader(feedSource));
@@ -181,7 +181,7 @@ public class ArticleService {
 
             MediaEntryModule mm = (MediaEntryModule) syndEntry.getModule(MediaModule.URI);
             if(mm != null && mm.getMediaContents() != null && mm.getMediaContents().length != 0){
-                log.info("{}", mm.getMediaContents()[0].getReference());
+                //log.info("{}", mm.getMediaContents()[0].getReference());
                 article.setUrlToImage(mm.getMediaContents()[0].getReference().toString());
             }
         } else {
@@ -223,7 +223,7 @@ public class ArticleService {
 
             MediaEntryModule mm = (MediaEntryModule) syndEntry.getModule(MediaModule.URI);
             if(mm != null && mm.getMediaContents() != null && mm.getMediaContents().length != 0){
-                log.info("{}", mm.getMediaContents()[0].getReference());
+                // log.info("{}", mm.getMediaContents()[0].getReference());
                 article.setUrlToImage(mm.getMediaContents()[0].getReference().toString());
                 article.setScaleImage(false);
             }
@@ -301,7 +301,7 @@ public class ArticleService {
 
     public ResponseEntity<GenericPage> getRatedArticles(int page, int size, Long categoryId,
                                                         List<Long> listPublisherIds, String lang,
-                                                        String fromDate, String toDate, Boolean topFeed, Boolean isAccessible, String guid) throws AuthenticationException {
+                                                        String fromDate, String toDate, Boolean isAccessible, String guid) throws AuthenticationException {
 
         if(fromDate == null && toDate == null){
             Instant instant = Instant.now().minus(24, ChronoUnit.HOURS);
@@ -312,8 +312,8 @@ public class ArticleService {
         }
 
         log.info("Request Parameter for /custom-news-api/articles/rated: ");
-        log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, topFeed: {}, isAccessible: {}, guid: {}", page, size, categoryId, listPublisherIds, lang,
-                 fromDate, toDate, topFeed, isAccessible, guid);
+        log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, isAccessible: {}, guid: {}", page, size, categoryId, listPublisherIds, lang,
+                 fromDate, toDate, isAccessible, guid);
 
         UserEntity userEntity = null;
         if (guid == null) {
@@ -327,7 +327,7 @@ public class ArticleService {
         }
         List<CustomRatedArticle> customRatedArticleList = articleRepository.retrieveAllRatedArticlesInDescOrder(
                 categoryId, listPublisherIds, lang,
-                DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), topFeed, isAccessible);
+                DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), isAccessible);
         /* // TODO WHY CAN WE NOT USE THE COUNT QUERY HERE; SQL ERROR
         Page<ArticleRepository.CustomRatedArticle> customRatedArticlePage = articleRepository.retrieveAllRatedArticlesInDescOrder(
                 title, category, publisherNewsPaper, lang,
@@ -336,33 +336,34 @@ public class ArticleService {
         */
         List<CustomRatedArticleDto> customRatedArticleDtoList = new ArrayList<>();
         customRatedArticleList.forEach(customRatedArticle -> {
-            CustomRatedArticleDto customRatedArticleDto = new CustomRatedArticleDto();
-            BeanUtils.copyProperties(customRatedArticle, customRatedArticleDto);
-            customRatedArticleDtoList.add(customRatedArticleDto);
+            customRatedArticleDtoList.add(mapstructMapper.customRatedArticleToCustomRatedArticleDto(customRatedArticle));
         });
 
-        // Check if has been rated
+        // Check if has been rated by user
         for(CustomRatedArticleDto articleDto:customRatedArticleDtoList){
             if(userEntity != null){
                 if(!ratingRepository.findByUserIdAndArticleId(userEntity.getId(),articleDto.getId()).isEmpty()){
-                    articleDto.setIsRated(true);
+                    articleDto.setIsRatedByUser(true);
+                } else {
+                    articleDto.setIsRatedByUser(false);
                 }
             }else{
                 if(!ratingRepository.findByGuidAndArticleId(guid, articleDto.getId()).isEmpty()){
-                    articleDto.setIsRated(true);
+                    articleDto.setIsRatedByUser(true);
+                } else {
+                    articleDto.setIsRatedByUser(false);
                 }
             }
         }
 
-
         return PageHolderUtils.getResponseEntityGenericPage(page, size, customRatedArticleDtoList);
     }
 
-    public ResponseEntity<GenericPage<CustomArticleDto>> getArticlesNotRated(int page, int size, Long categoryId, List<Long> listPublisherIds, String lang, Boolean isAccessible, String fromDate, String toDate, Boolean topFeed) {
+    public ResponseEntity<GenericPage<CustomArticleDto>> getArticlesNotRated(int page, int size, Long categoryId, List<Long> listPublisherIds, String lang, Boolean isAccessible, String fromDate, String toDate) {
         if (listPublisherIds == null) {
             listPublisherIds = publisherRepository.findAll().stream().map(PublisherEntity::getId).collect(Collectors.toList());
         }
-        Page<CustomArticle> articlesPage = articleRepository.retrieveUnratedArticlesByCategoryIdAndPublisherIdsAndLanguage(categoryId, listPublisherIds, lang, isAccessible, DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), topFeed,PageRequest.of(page, size));
+        Page<CustomArticle> articlesPage = articleRepository.retrieveUnratedArticlesByCategoryIdAndPublisherIdsAndLanguage(categoryId, listPublisherIds, lang, isAccessible, DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate),PageRequest.of(page, size));
 
         GenericPage<CustomArticleDto> genericPage = new GenericPage<>();
         genericPage.setData(articlesPage.stream().map(a -> mapstructMapper.customArticleToCustomArticleDto(a)).collect(Collectors.toList()));

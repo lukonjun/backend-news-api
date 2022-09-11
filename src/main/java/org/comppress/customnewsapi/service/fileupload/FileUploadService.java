@@ -35,10 +35,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FileUploadService {
 
-    private final int TOP_NEWS_PUBLISHER = 0;
-    private final int TOP_NEWS_LINK = 1;
-    private final int TOP_NEWS_LANG = 2;
-
     private final int RSS_FEED_SOURCE = 0;
     private final int RSS_FEED_CATEGORY = 1;
     private final int RSS_FEED_LINK = 2;
@@ -47,8 +43,9 @@ public class FileUploadService {
     private final int CRITERIA_ID = 0;
     private final int CRITERIA_NAME = 1;
 
-    private final int PUBLISHER_NAME = 0;
-    private final int PUBLISHER_SVG_URL = 1;
+    private final int PUBLISHER_LANG = 0;
+    private final int PUBLISHER_NAME = 1;
+    private final int PUBLISHER_SVG_URL = 2;
 
     private final int CATEGORY_LANG = 0;
     private final int CATEGORY_NAME = 1;
@@ -139,14 +136,16 @@ public class FileUploadService {
         return ResponseEntity.ok().body(criteriaDtoList);
     }
 
-    public ResponseEntity<List<PublisherDto>> savePublisherSVGs(MultipartFile file) {
+    public ResponseEntity<List<PublisherDto>> savePublisher(MultipartFile file) {
         log.info("LINKS IMPORT CSV IS PROCESSING {}", file.getName());
 
         List<CSVRecord> csvRecordList = getRecords(file);
         List<PublisherDto> publisherDtoList = new ArrayList<>();
         for(CSVRecord csvRecord:csvRecordList){
-            PublisherEntity publisher = publisherRepository.findByName(csvRecord.get(PUBLISHER_NAME));
-            if(publisher != null){
+            if(publisherRepository.findByNameAndLang(csvRecord.get(PUBLISHER_NAME),csvRecord.get(PUBLISHER_LANG)) == null){
+                PublisherEntity publisher = new PublisherEntity();
+                publisher.setName(csvRecord.get(PUBLISHER_NAME));
+                publisher.setLang(csvRecord.get(PUBLISHER_LANG));
                 publisher.setUrlToImage(csvRecord.get(PUBLISHER_SVG_URL));
                 publisherRepository.save(publisher);
                 PublisherDto publisherDto = new PublisherDto();

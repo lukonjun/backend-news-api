@@ -22,10 +22,11 @@ public class ArticleDto {
     @JsonProperty(value = "count_comment")
     private Integer countComment;
     @JsonProperty(value = "is_accessible")
-    private boolean isAccessible;
+    private Boolean isAccessible;
     @JsonProperty(value = "scale_image")
-    private boolean scaleImage;
+    private Boolean scaleImage;
+    // TODO rename to is_rated_by_user
     @JsonProperty("is_rated")
-    private Boolean isRated;
+    private Boolean isRatedByUser;
 
 }
