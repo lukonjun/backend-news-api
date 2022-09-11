@@ -21,8 +21,8 @@ public class ArticleDto {
     private Integer countRatings;
     @JsonProperty(value = "count_comment")
     private Integer countComment;
-    @JsonProperty(value = "is_accessible")
-    private Boolean isAccessible;
+    @JsonProperty(value = "paywall_article")
+    private Boolean paywallArticle;
     @JsonProperty(value = "scale_image")
     private Boolean scaleImage;
     // TODO rename to is_rated_by_user

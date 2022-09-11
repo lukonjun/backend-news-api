@@ -131,17 +131,17 @@ public class ArticleService {
     }
 
     @Async("ThreadPoolExecutor")
-    public void update(ArticleEntity article) throws URISyntaxException, IOException {
+    public void update(ArticleEntity article) {
         try {
             String response = urlReader(article.getUrl());
-            if(response == null){
-
-            } else if (response.contains("\"isAccessibleForFree\":false") || response.contains("\"isAccessibleForFree\": false")) {
-                article.setAccessible(false);
-            } else {
-                article.setAccessible(true);
+            if (response != null) {
+                if (response.contains("\"isAccessibleForFree\":false") || response.contains("\"isAccessibleForFree\": false")) {
+                    article.setPaywallArticle(true);
+                } else {
+                    article.setPaywallArticle(false);
+                }
             }
-            article.setAccessibleUpdated(true);
+            article.setPaywallArticleUpdated(true);
             articleRepository.save(article);
         } catch (Exception e) {
             log.warn(e.getMessage());
@@ -281,12 +281,12 @@ public class ArticleService {
         return response.body();
     }
 
-    public ResponseEntity<GenericPage<CustomArticleDto>> getArticles(int page, int size, String title, String category, String publisherNewsPaper, String lang, Boolean isAccessible, String fromDate, String toDate) {
+    public ResponseEntity<GenericPage<CustomArticleDto>> getArticles(int page, int size, String title, String category, String publisherNewsPaper, String lang, Boolean filterOutPaywallArticles, String fromDate, String toDate) {
 
         Page<CustomArticle> articlesPage = articleRepository
                 .retrieveByCategoryOrPublisherNameToCustomArticle(category,
                         publisherNewsPaper, title, lang,
-                        DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), isAccessible,
+                        DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), filterOutPaywallArticles,
                         PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
 
         GenericPage<CustomArticleDto> genericPage = new GenericPage<>();
@@ -301,7 +301,7 @@ public class ArticleService {
 
     public ResponseEntity<GenericPage> getRatedArticles(int page, int size, Long categoryId,
                                                         List<Long> listPublisherIds, String lang,
-                                                        String fromDate, String toDate, Boolean isAccessible, String guid) throws AuthenticationException {
+                                                        String fromDate, String toDate, Boolean filterOutPaywallArticles, String guid) throws AuthenticationException {
 
         if(fromDate == null && toDate == null){
             Instant instant = Instant.now().minus(24, ChronoUnit.HOURS);
@@ -312,8 +312,8 @@ public class ArticleService {
         }
 
         log.info("Request Parameter for /custom-news-api/articles/rated: ");
-        log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, isAccessible: {}, guid: {}", page, size, categoryId, listPublisherIds, lang,
-                 fromDate, toDate, isAccessible, guid);
+        log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, filterOutPaywallArticles: {}, guid: {}", page, size, categoryId, listPublisherIds, lang,
+                 fromDate, toDate, filterOutPaywallArticles, guid);
 
         UserEntity userEntity = null;
         if (guid == null) {
@@ -327,7 +327,7 @@ public class ArticleService {
         }
         List<CustomRatedArticle> customRatedArticleList = articleRepository.retrieveAllRatedArticlesInDescOrder(
                 categoryId, listPublisherIds, lang,
-                DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), isAccessible);
+                DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), filterOutPaywallArticles);
         /* // TODO WHY CAN WE NOT USE THE COUNT QUERY HERE; SQL ERROR
         Page<ArticleRepository.CustomRatedArticle> customRatedArticlePage = articleRepository.retrieveAllRatedArticlesInDescOrder(
                 title, category, publisherNewsPaper, lang,
@@ -359,14 +359,14 @@ public class ArticleService {
         return PageHolderUtils.getResponseEntityGenericPage(page, size, customRatedArticleDtoList);
     }
 
-    public ResponseEntity<GenericPage<CustomArticleDto>> getArticlesNotRated(int page, int size, Long categoryId, List<Long> listPublisherIds, String lang, Boolean isAccessible, String fromDate, String toDate) {
+    public ResponseEntity<GenericPage<CustomArticleDto>> getArticlesNotRated(int page, int size, Long categoryId, List<Long> listPublisherIds, String lang, Boolean filterOutPaywallArticles, String fromDate, String toDate) {
         if (listPublisherIds == null) {
             listPublisherIds = publisherRepository.findAll().stream().map(PublisherEntity::getId).collect(Collectors.toList());
         }
-        Page<CustomArticle> articlesPage = articleRepository.retrieveUnratedArticlesByCategoryIdAndPublisherIdsAndLanguage(categoryId, listPublisherIds, lang, isAccessible, DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate),PageRequest.of(page, size));
+        Page<CustomArticle> articlesPage = articleRepository.retrieveUnratedArticlesByCategoryIdAndPublisherIdsAndLanguage(categoryId, listPublisherIds, lang, filterOutPaywallArticles, DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate),PageRequest.of(page, size));
 
         GenericPage<CustomArticleDto> genericPage = new GenericPage<>();
-        genericPage.setData(articlesPage.stream().map(a -> mapstructMapper.customArticleToCustomArticleDto(a)).collect(Collectors.toList()));
+        genericPage.setData(articlesPage.stream().map(mapstructMapper::customArticleToCustomArticleDto).collect(Collectors.toList()));
         BeanUtils.copyProperties(articlesPage, genericPage);
 
         return ResponseEntity.status(HttpStatus.OK).body(genericPage);

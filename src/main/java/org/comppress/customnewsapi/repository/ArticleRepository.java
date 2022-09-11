@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
 
-    Page<ArticleEntity> findByIsAccessibleUpdatedFalse(Pageable pageable);
+    Page<ArticleEntity> findByPaywallArticleUpdatedFalse(Pageable pageable);
 
     boolean existsById(Long id);
 
@@ -26,7 +26,7 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
 
     @Query(value = """
             Select a.id, a.author, a.title, a.description, a.url, a.url_to_image as urlToImage, a.published_at as publishedAt,
-                   a.count_ratings as countRatings, a.count_comment as countComment, a.is_accessible as isAccessible, a.scale_image as scaleImage,
+                   a.count_ratings as countRatings, a.count_comment as countComment, a.paywall_article as paywallArticle, a.scale_image as scaleImage,
                    rf.category_id as categoryId, rf.publisher_id as publisherId, 
                    c.name as categoryName, 
                    p.name as publisherName
@@ -35,13 +35,20 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
                 JOIN category c on c.id = rf.category_id
                 JOIN publisher p on p.id = rf.publisher_id
             WHERE rf.category_id = :categoryId
+              AND p.id in :publisherIds
+              AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
               AND a.published_at is not null Order by a.published_at DESC Limit 1
             """, nativeQuery = true)
-    CustomArticle retrieveLatestArticleOfCategory(@Param("categoryId") Long categoryId);
+    CustomArticle retrieveLatestArticleOfCategory(
+            @Param("categoryId") Long categoryId,
+            @Param("filterOutPaywallArticles") Boolean filterOutPaywallArticles,
+            @Param("publisherIds") List<Long> publisherIds
+    );
+
 
     @Query(value = """
             Select a.id, a.author, a.title, a.description, a.url, a.url_to_image as urlToImage, a.published_at as publishedAt,
-                   a.count_ratings as countRatings, a.count_comment as countComment, a.is_accessible as isAccessible, a.scale_image as scaleImage,
+                   a.count_ratings as countRatings, a.count_comment as countComment, a.paywall_article as paywallArticle, a.scale_image as scaleImage,
                    rf.category_id as categoryId, rf.publisher_id as publisherId,
                    c.name as categoryName,
                    p.name as publisherName
@@ -53,7 +60,7 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
               AND (:publisherName is null or :publisherName = '' or p.name LIKE %:publisherName%)
               AND (:title is null or :title = '' or a.title LIKE %:title%)
               AND (:language is null or :language = '' or rf.lang LIKE :language)
-              AND (:isAccessible =  0 or :isAccessible = a.is_accessible)
+              AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
               AND a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now())
             """,
             countQuery = """
@@ -65,7 +72,7 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
               AND (:publisherName is null or :publisherName = '' or p.name LIKE %:publisherName%)
               AND (:title is null or :title = '' or a.title LIKE %:title%)
               AND (:language is null or :language = '' or rf.lang LIKE :language)
-              AND (:isAccessible =  0 or :isAccessible = a.is_accessible)
+              AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
               AND a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now())
             """, nativeQuery = true)
     Page<CustomArticle> retrieveByCategoryOrPublisherNameToCustomArticle(
@@ -75,12 +82,12 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
             @Param("language") String language,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
-            @Param("isAccessible") Boolean isAccessible,
+            @Param("filterOutPaywallArticles") Boolean filterOutPaywallArticles,
             Pageable pageable);
 
     @Query(value = """
             select a.id, a.author, a.title, a.description, a.url, a.url_to_image as urlToImage, a.published_at as publishedAt,
-                   a.count_ratings as countRatings, a.count_comment as countComment, a.is_accessible as isAccessible, a.scale_image as scaleImage,
+                   a.count_ratings as countRatings, a.count_comment as countComment, a.paywall_article as paywallArticle, a.scale_image as scaleImage,
                    rf.category_id as categoryId, rf.publisher_id as publisherId,
                    c.name as categoryName,
                    p.name as publisherName,
@@ -103,7 +110,7 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
             WHERE rf.category_id = :categoryId
               AND rf.publisher_id in (:publisherIds)
               AND (:language is null or :language = '' or rf.lang LIKE :language)
-              AND (:isAccessible =  0 or :isAccessible = a.is_accessible)
+              AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
               AND a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now())
             group by t.article_id order by totalAverageRating DESC
             """, nativeQuery = true)
@@ -113,12 +120,12 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
             @Param("language") String language,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
-            @Param("isAccessible") Boolean isAccessible);
+            @Param("filterOutPaywallArticles") Boolean filterOutPaywallArticles);
 
 
     @Query(value = """
 select a.id, a.author, a.title, a.description, a.url, a.url_to_image as urlToImage, a.published_at as publishedAt,
-       a.count_ratings as countRatings, a.count_comment as countComment, a.is_accessible as isAccessible, a.scale_image as scaleImage,
+       a.count_ratings as countRatings, a.count_comment as countComment, a.paywall_article as paywallArticle, a.scale_image as scaleImage,
        rf.category_id as categoryId, rf.publisher_id as publisherId,
        c.name as categoryName,
        p.name as publisherName,
@@ -141,7 +148,7 @@ t.average_rating_criteria_1 as averageRatingCriteria1, t.average_rating_criteria
            WHERE ( rf.lang = :lang )
              AND c.id = :categoryId
              AND p.id in :publisherIds
-             AND (:isAccessible =  0 or :isAccessible = a.is_accessible)
+             AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
              AND a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now())
             group by t.article_id order by totalAverageRating DESC LIMIT 1
             """, nativeQuery = true)
@@ -151,12 +158,12 @@ t.average_rating_criteria_1 as averageRatingCriteria1, t.average_rating_criteria
             @Param("lang") String lang,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
-            @Param("isAccessible") Boolean isAccessible
+            @Param("filterOutPaywallArticles") Boolean filterOutPaywallArticles
     );
 
     @Query(value = "SELECT a.id as id, a.author as author, a.title as title, a.description as description, " +
             "a.url as url, a.url_to_image as urlToImage, a.published_at as publishedAt, a.count_ratings as countRatings, " +
-            "a.is_accessible as isAccessible, a.scale_image as scaleImage, p.id as publisherId, p.name as publisherName, " +
+            "a.paywall_article as paywallArticle, a.scale_image as scaleImage, p.id as publisherId, p.name as publisherName, " +
             "0 as countComment, c.id as categoryId, c.name as categoryName " +
             "FROM article a JOIN rss_feed rf on rf.id = a.rss_feed_id " +
             "JOIN publisher p on p.id = rf.publisher_id " +
@@ -165,7 +172,7 @@ t.average_rating_criteria_1 as averageRatingCriteria1, t.average_rating_criteria
             "rf.category_id = :categoryId AND " +
             "rf.publisher_id in (:publisherIds) AND " +
             "rf.lang = :lang AND " +
-            "(:isAccessible =  0 or :isAccessible = a.is_accessible) AND " +
+            "(:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE) AND " +
             "a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now()) " +
             "ORDER BY a.published_at DESC",
             countQuery = "SELECT count(*) " +
@@ -176,14 +183,14 @@ t.average_rating_criteria_1 as averageRatingCriteria1, t.average_rating_criteria
                     "rf.category_id = :categoryId AND " +
                     "rf.publisher_id in (:publisherIds) AND " +
                     "rf.lang = :lang AND " +
-                    "(:isAccessible =  0 or :isAccessible = a.is_accessible) AND " +
+                    "(:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE) AND " +
                     "a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now())"
             , nativeQuery = true)
     Page<CustomArticle> retrieveUnratedArticlesByCategoryIdAndPublisherIdsAndLanguage(
             @Param("categoryId") Long categoryId,
             @Param("publisherIds") List<Long> publisherIds,
             @Param("lang") String lang,
-            @Param("isAccessible") Boolean isAccessible,
+            @Param("filterOutPaywallArticles") Boolean filterOutPaywallArticles,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable);

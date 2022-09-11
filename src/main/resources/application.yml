@@ -44,9 +44,9 @@ scheduler:
     initialDelayIntervalMilliSeconds: 5000
     enabled: no
   paywall:
-    triggeringIntervalMilliSeconds: 600000
-    initialDelayIntervalMilliSeconds: 20000
-    enabled: no
+    triggeringIntervalMilliSeconds: 30000
+    initialDelayIntervalMilliSeconds: 10000
+    enabled: yes
     page-size: 100
   twitter:
     triggeringIntervalMilliSeconds: 600000
