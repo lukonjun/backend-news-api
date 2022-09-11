@@ -25,8 +25,7 @@ public class ArticleDto {
     private Boolean paywallArticle;
     @JsonProperty(value = "scale_image")
     private Boolean scaleImage;
-    // TODO rename to is_rated_by_user
-    @JsonProperty("is_rated")
+    @JsonProperty("is_rated_by_user")
     private Boolean isRatedByUser;
 
 }
