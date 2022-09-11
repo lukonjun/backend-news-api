@@ -6,6 +6,7 @@ on:
     paths:
     - src/**
     - helm/**
+    - Dockerfile
 
 jobs:
   build-and-push-stage:
