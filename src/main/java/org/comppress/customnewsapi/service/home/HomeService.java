@@ -3,12 +3,14 @@ package org.comppress.customnewsapi.service.home;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.comppress.customnewsapi.dto.CustomCategoryDto;
+import org.comppress.customnewsapi.dto.article.CustomArticleDto;
 import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
 import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.entity.AbstractEntity;
 import org.comppress.customnewsapi.entity.CategoryEntity;
 import org.comppress.customnewsapi.entity.PublisherEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
+import org.comppress.customnewsapi.entity.article.CustomArticle;
 import org.comppress.customnewsapi.mapper.MapstructMapper;
 import org.comppress.customnewsapi.repository.ArticleRepository;
 import org.comppress.customnewsapi.repository.CategoryRepository;
@@ -77,8 +79,8 @@ public class HomeService implements BaseSpecification {
         return categoryIds;
     }
 
-    public ResponseEntity<GenericPage> getUserPreference(int page,int size,String lang, List<Long> categoryIds,
-                                                               List<Long> publisherIds, String fromDate, String toDate, Boolean isAccessible) {
+    public ResponseEntity<GenericPage> getHome(int page, int size, String lang, List<Long> categoryIds,
+                                               List<Long> publisherIds, String fromDate, String toDate, Boolean isAccessible) {
         // if Date not set, retrieve results for last 24 hours
         if(fromDate == null && toDate == null){
             Instant instant = Instant.now().minus(24, ChronoUnit.HOURS);
@@ -112,12 +114,9 @@ public class HomeService implements BaseSpecification {
             customCategoryDto.setArticle(customRatedArticleDto);
             twitterService.setReplyCount(customRatedArticleDto);
         } else {
-            CustomRatedArticle article2 = articleRepository.retrieveLatestArticleOfCategory(categoryId);
-            if(article2 == null) {
-                customCategoryDto.setArticle(null);
-            }else{
-                customCategoryDto.setArticle(mapstructMapper.customRatedArticleToCustomRatedArticleDto(article2));
-            }
+            CustomArticle customArticle = articleRepository.retrieveLatestArticleOfCategory(categoryId);
+            CustomArticleDto customArticleDto = mapstructMapper.customArticleToCustomArticleDto(customArticle);
+            customCategoryDto.setArticle(customArticleDto);
         }
 
         BeanUtils.copyProperties(category, customCategoryDto);

@@ -37,7 +37,7 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
             WHERE rf.category_id = :categoryId
               AND a.published_at is not null Order by a.published_at DESC Limit 1
             """, nativeQuery = true)
-    CustomRatedArticle retrieveLatestArticleOfCategory(@Param("categoryId") Long categoryId);
+    CustomArticle retrieveLatestArticleOfCategory(@Param("categoryId") Long categoryId);
 
     @Query(value = """
             Select a.id, a.author, a.title, a.description, a.url, a.url_to_image as urlToImage, a.published_at as publishedAt,

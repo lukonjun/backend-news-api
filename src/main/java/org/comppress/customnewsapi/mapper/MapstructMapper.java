@@ -39,4 +39,5 @@ public interface MapstructMapper {
 
     CustomCategoryDto categoryEntityToCustomCategoryDto(CategoryEntity category);
 
+
 }
