@@ -80,7 +80,7 @@ public class HomeService implements BaseSpecification {
     }
 
     public ResponseEntity<GenericPage> getHome(int page, int size, String lang, List<Long> categoryIds,
-                                               List<Long> publisherIds, String fromDate, String toDate, Boolean isAccessible) {
+                                               List<Long> publisherIds, String fromDate, String toDate, Boolean filterOutPaywallArticles) {
         // if Date not set, retrieve results for last 24 hours
         if(fromDate == null && toDate == null){
             Instant instant = Instant.now().minus(24, ChronoUnit.HOURS);
@@ -96,25 +96,25 @@ public class HomeService implements BaseSpecification {
         String finalFromDate = fromDate;
         List<CustomCategoryDto> customCategoryDtos = categoryRepository.
                 findByCategoryIds(categoryIds).stream().map(s -> setArticles(s, lang,
-                finalPubIds, DateUtils.stringToLocalDateTime(finalFromDate), DateUtils.stringToLocalDateTime(toDate), isAccessible)).collect(Collectors.toList());
+                finalPubIds, DateUtils.stringToLocalDateTime(finalFromDate), DateUtils.stringToLocalDateTime(toDate), filterOutPaywallArticles)).collect(Collectors.toList());
         return PageHolderUtils.getResponseEntityGenericPage(page,size,customCategoryDtos);
     }
 
     private CustomCategoryDto setArticles(CategoryEntity category, String lang,
-                                          List<Long> publisherIds, LocalDateTime fromDate, LocalDateTime toDate, Boolean isAccessible) {
+                                          List<Long> publisherIds, LocalDateTime fromDate, LocalDateTime toDate, Boolean filterOutPaywallArticles) {
         // TODO Limit 1, Publishers included, Rated
         if (publisherIds == null || publisherIds.isEmpty()) {
             publisherIds = publisherRepository.findByLang(lang).stream().map(AbstractEntity::getId).collect(Collectors.toList());
         }
         Long categoryId = category.getId();
-        CustomRatedArticle article = articleRepository.retrieveOneRatedArticleByCategoryIdsAndPublisherIdsAndLanguageAndLimit(categoryId,publisherIds,lang,fromDate,toDate,isAccessible);
+        CustomRatedArticle article = articleRepository.retrieveOneRatedArticleByCategoryIdsAndPublisherIdsAndLanguageAndLimit(categoryId,publisherIds,lang,fromDate,toDate,filterOutPaywallArticles);
         CustomCategoryDto customCategoryDto = new CustomCategoryDto();
         if(article != null){
             CustomRatedArticleDto customRatedArticleDto = mapstructMapper.customRatedArticleToCustomRatedArticleDto(article);
             customCategoryDto.setArticle(customRatedArticleDto);
             twitterService.setReplyCount(customRatedArticleDto);
         } else {
-            CustomArticle customArticle = articleRepository.retrieveLatestArticleOfCategory(categoryId);
+            CustomArticle customArticle = articleRepository.retrieveLatestArticleOfCategory(categoryId, filterOutPaywallArticles, publisherIds);
             CustomArticleDto customArticleDto = mapstructMapper.customArticleToCustomArticleDto(customArticle);
             customCategoryDto.setArticle(customArticleDto);
         }

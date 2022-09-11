@@ -36,7 +36,7 @@ public class PaywallUpdateScheduler {
     public void saveNewsFeed() throws URISyntaxException, IOException {
         if(enabled){
             log.info("Paywall Scheduler Running!");
-            Page<ArticleEntity> articleList = articleRepository.findByIsAccessibleUpdatedFalse(PageRequest.of(0, pageSize));
+            Page<ArticleEntity> articleList = articleRepository.findByPaywallArticleUpdatedFalse(PageRequest.of(0, pageSize));
             for (ArticleEntity article : articleList.toList()) {
                 articleService.update(article);
             }

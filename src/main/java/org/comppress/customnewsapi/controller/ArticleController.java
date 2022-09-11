@@ -33,11 +33,11 @@ public class ArticleController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "publisherNewsPaper", required = false) String publisherNewsPaper,
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
-            @RequestParam(value = "isAccessible", required = false, defaultValue = "false") Boolean isAccessible,
+            @RequestParam(value = "filterOutPaywallArticles", required = false, defaultValue = "false") Boolean filterOutPaywallArticles,
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate
     ) {
-        return articleService.getArticles(page, size, title, category, publisherNewsPaper, lang, isAccessible, fromDate, toDate);
+        return articleService.getArticles(page, size, title, category, publisherNewsPaper, lang, filterOutPaywallArticles, fromDate, toDate);
     }
 
     @GetMapping("/unrated")
@@ -47,11 +47,11 @@ public class ArticleController {
             @RequestParam(value = "categoryId") Long categoryId,
             @RequestParam(value = "listPublisherIds", required = false) List<Long> listPublisherIds,
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
-            @RequestParam(value = "isAccessible", required = false, defaultValue = "false") Boolean isAccessible,
+            @RequestParam(value = "filterOutPaywallArticles", required = false, defaultValue = "false") Boolean filterOutPaywallArticles,
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate
     ) {
-        return articleService.getArticlesNotRated(page, size, categoryId, listPublisherIds, lang, isAccessible, fromDate, toDate);
+        return articleService.getArticlesNotRated(page, size, categoryId, listPublisherIds, lang, filterOutPaywallArticles, fromDate, toDate);
     }
 
     @GetMapping("/rated")
@@ -63,11 +63,11 @@ public class ArticleController {
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate,
-            @RequestParam(value = "isAccessible", required = false, defaultValue = "false") Boolean isAccessible,
+            @RequestParam(value = "filterOutPaywallArticles", required = false, defaultValue = "false") Boolean filterOutPaywallArticles,
             @RequestParam(value = "guid", required = false) String guid
     ) {
         try {
-            return articleService.getRatedArticles(page, size, categoryId, listPublisherIds, lang, fromDate, toDate, isAccessible, guid);
+            return articleService.getRatedArticles(page, size, categoryId, listPublisherIds, lang, fromDate, toDate, filterOutPaywallArticles, guid);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

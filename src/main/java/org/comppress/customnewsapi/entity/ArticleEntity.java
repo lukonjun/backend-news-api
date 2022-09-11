@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "article", indexes = {
         @Index(columnList = "publishedAt"),
-        @Index(columnList = "isAccessible"),
+        @Index(columnList = "paywallArticle"),
         @Index(columnList = "rssFeedId"),
         @Index(columnList = "countRatings")
 })
@@ -36,8 +36,8 @@ public class ArticleEntity extends AbstractEntity{
     private Integer countRatings = 0;
     @Column(columnDefinition = "integer default 0",nullable = false)
     private Integer countComment = 0;
-    private boolean isAccessible = true;
-    private boolean isAccessibleUpdated = false;
+    private boolean paywallArticle = false;
+    private boolean paywallArticleUpdated = false;
     private boolean scaleImage = false;
 
 }

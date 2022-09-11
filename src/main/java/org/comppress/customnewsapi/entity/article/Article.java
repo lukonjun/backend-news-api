@@ -10,6 +10,6 @@ public interface Article {
     String getPublishedAt();
     Integer getCountRatings();
     Integer getCountComment();
-    Boolean getIsAccessible();
+    Boolean getPaywallArticle();
     Boolean getScaleImage();
 }

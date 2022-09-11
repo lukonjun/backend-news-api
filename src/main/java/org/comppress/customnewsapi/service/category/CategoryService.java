@@ -1,18 +1,12 @@
 package org.comppress.customnewsapi.service.category;
 
 import org.comppress.customnewsapi.dto.CategoryDto;
-import org.comppress.customnewsapi.dto.CategoryUserDto;
-import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.entity.CategoryEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
 import org.comppress.customnewsapi.mapper.MapstructMapper;
 import org.comppress.customnewsapi.repository.CategoryRepository;
 import org.comppress.customnewsapi.repository.UserRepository;
-import org.comppress.customnewsapi.utils.PageHolderUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -38,50 +32,38 @@ public class CategoryService {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<GenericPage<CategoryDto>> getCategories(String lang, int page, int size) {
-        Page<CategoryEntity> categoryPage = categoryRepository.findByLang(lang, PageRequest.of(page, size));
+    public ResponseEntity<List<CategoryDto>> getCategories(String lang) {
+        List<CategoryEntity> categoryEntityList  = categoryRepository.findByLang(lang);
 
-        GenericPage<CategoryDto> genericPage = new GenericPage<>();
-        genericPage.setData(categoryPage.stream().map(category -> mapstructMapper.categoryToCategoryDto(category)).collect(Collectors.toList()));
-        BeanUtils.copyProperties(categoryPage, genericPage);
+        List<CategoryDto> categoryDtoList = categoryEntityList.stream().map(mapstructMapper::categoryToCategoryDto).collect(Collectors.toList());
 
-        return ResponseEntity.status(HttpStatus.OK).body(genericPage);
+        return ResponseEntity.status(HttpStatus.OK).body(categoryDtoList);
     }
 
-    public ResponseEntity<GenericPage> getCategoriesUser(String lang, int page, int size) {
+    /**
+     * Retrieves the Categories of a user. You need to specify a parameter for the language. This works only for authenticated users.
+     * @param lang
+     * @return
+     */
+    public ResponseEntity<List<CategoryDto>> getCategoriesUser(String lang) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserEntity userEntity = userRepository.findByUsernameAndDeletedFalse(authentication.getName());
 
         if(userEntity.getListCategoryIds() == null || userEntity.getListCategoryIds().isEmpty() || doesNotContainAnyCategoriesFromLang(userEntity.getListCategoryIds(),lang)){
-            Page<CategoryEntity> categoryPage = categoryRepository.findByLang(lang,PageRequest.of(page, size));
-            List<CategoryUserDto> categoryUserDtoList = new ArrayList<>();
-            for(CategoryEntity category:categoryPage.toList()){
-                CategoryUserDto categoryUserDto = new CategoryUserDto();
-                BeanUtils.copyProperties(category,categoryUserDto);
-                categoryUserDto.setSelected(true);
-                categoryUserDtoList.add(categoryUserDto);
-            }
-            GenericPage<CategoryUserDto> genericPage = new GenericPage<>();
-            genericPage.setData(categoryUserDtoList);
-            BeanUtils.copyProperties(categoryPage, genericPage);
-
-            return ResponseEntity.status(HttpStatus.OK).body(genericPage);
+            List<CategoryEntity> categoryEntityList = categoryRepository.findByLang(lang);
+            List<CategoryDto> categoryDtoList = categoryEntityList.stream().map(mapstructMapper::categoryToCategoryDto).collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.OK).body(categoryDtoList);
         } else {
-            List<Long> categoryIdList =  Stream.of(userEntity.getListCategoryIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
-            List<CategoryUserDto> categoryUserDtoList = new ArrayList<>();
-            for (CategoryEntity category:categoryRepository.findByLang(lang)){
-                CategoryUserDto categoryUserDto = new CategoryUserDto();
-                BeanUtils.copyProperties(category,categoryUserDto);
-                if (categoryIdList.contains(category.getId())) {
-                    categoryUserDto.setSelected(true);
-                } else {
-                    categoryUserDto.setSelected(false);
-                }
-                categoryUserDtoList.add(categoryUserDto);
-            }
+            List<Long> categoryIdList = Stream.of(userEntity.getListCategoryIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
 
-            return PageHolderUtils.getResponseEntityGenericPage(page, size, categoryUserDtoList);
+            List<CategoryDto> categoryDtoList = new ArrayList<>();
+            categoryRepository.findByLang(lang).stream().forEach(category -> {
+                if(categoryIdList.contains(category.getId())){
+                    categoryDtoList.add(mapstructMapper.categoryToCategoryDto(category));
+                }
+            });
+            return ResponseEntity.status(HttpStatus.OK).body(categoryDtoList);
         }
     }
 
