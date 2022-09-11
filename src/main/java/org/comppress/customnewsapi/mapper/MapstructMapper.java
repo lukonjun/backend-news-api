@@ -37,4 +37,6 @@ public interface MapstructMapper {
     @Mapping(source = "publishedAt", target = "publishedAt", dateFormat = "yyyy-MM-dd HH:mm:ss.S")
     CustomArticleDto customArticleToCustomArticleDto(CustomArticle s);
 
+    CustomCategoryDto categoryEntityToCustomCategoryDto(CategoryEntity category);
+
 }

@@ -11,6 +11,7 @@ public interface PublisherRepository extends JpaRepository<PublisherEntity,Long>
 
     Boolean existsByName(String name);
     PublisherEntity findByName(String name);
+    PublisherEntity findByNameAndLang(String name, String lang);
     List<PublisherEntity> findByLang(String lang);
     Page<PublisherEntity> findByLang(String lang, Pageable pageable);
 

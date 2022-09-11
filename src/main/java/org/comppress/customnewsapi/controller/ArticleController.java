@@ -49,10 +49,9 @@ public class ArticleController {
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
             @RequestParam(value = "isAccessible", required = false, defaultValue = "false") Boolean isAccessible,
             @RequestParam(value = "fromDate", required = false) String fromDate,
-            @RequestParam(value = "toDate", required = false) String toDate,
-            @RequestParam(value = "topFeed", required = false, defaultValue = "false") Boolean topFeed
+            @RequestParam(value = "toDate", required = false) String toDate
     ) {
-        return articleService.getArticlesNotRated(page, size, categoryId, listPublisherIds, lang, isAccessible, fromDate, toDate, topFeed);
+        return articleService.getArticlesNotRated(page, size, categoryId, listPublisherIds, lang, isAccessible, fromDate, toDate);
     }
 
     @GetMapping("/rated")
@@ -65,11 +64,10 @@ public class ArticleController {
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate,
             @RequestParam(value = "isAccessible", required = false, defaultValue = "false") Boolean isAccessible,
-            @RequestParam(value = "topFeed", required = false, defaultValue = "false") Boolean topFeed,
             @RequestParam(value = "guid", required = false) String guid
     ) {
         try {
-            return articleService.getRatedArticles(page, size, categoryId, listPublisherIds, lang, fromDate, toDate, topFeed, isAccessible, guid);
+            return articleService.getRatedArticles(page, size, categoryId, listPublisherIds, lang, fromDate, toDate, isAccessible, guid);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

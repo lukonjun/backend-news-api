@@ -34,9 +34,10 @@ public class ArticleEntity extends AbstractEntity{
     private Long rssFeedId;
     @Column(columnDefinition = "integer default 0",nullable = false)
     private Integer countRatings = 0;
+    @Column(columnDefinition = "integer default 0",nullable = false)
+    private Integer countComment = 0;
     private boolean isAccessible = true;
     private boolean isAccessibleUpdated = false;
-    private boolean isTopNews = false;
     private boolean scaleImage = false;
 
 }
