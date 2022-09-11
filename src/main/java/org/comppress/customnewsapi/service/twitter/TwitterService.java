@@ -4,8 +4,8 @@ import io.github.redouane59.twitter.TwitterClient;
 import io.github.redouane59.twitter.dto.tweet.Tweet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
 import org.comppress.customnewsapi.dto.TwitterArticleDto;
+import org.comppress.customnewsapi.dto.article.ArticleDto;
 import org.comppress.customnewsapi.entity.ArticleEntity;
 import org.comppress.customnewsapi.entity.TwitterTweetEntity;
 import org.comppress.customnewsapi.mapper.TwitterMapper;
@@ -91,7 +91,7 @@ public class TwitterService {
         });
     }
 
-    public void setReplyCount(CustomRatedArticleDto articleDto) {
+    public void setReplyCount(ArticleDto articleDto) {
         TwitterTweetEntity tweet = twitterRepository.findByArticleId(articleDto.getId());
         if(tweet == null){
             articleDto.setCountComment(0);

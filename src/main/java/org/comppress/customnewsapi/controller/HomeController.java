@@ -29,7 +29,7 @@ public class HomeController {
             @RequestParam(value = "toDate", required = false) String toDate,
             @RequestParam(value = "isAccessible", required = false, defaultValue = "false") Boolean isAccessible
     ) {
-        return homeService.getUserPreference(page, size, lang, categoryIds, publisherIds, fromDate, toDate, isAccessible);
+        return homeService.getHome(page, size, lang, categoryIds, publisherIds, fromDate, toDate, isAccessible);
     }
 
 }
