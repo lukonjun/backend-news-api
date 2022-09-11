@@ -1,7 +1,7 @@
 package org.comppress.customnewsapi.mapper;
 
 import org.comppress.customnewsapi.dto.RatingDto;
-import org.comppress.customnewsapi.entity.Rating;
+import org.comppress.customnewsapi.entity.RatingEntity;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 @Mapper(componentModel = "spring")
 public interface RatingMapper {
 
-    RatingDto ratingToRatingDto(Rating rating);
+    RatingDto ratingToRatingDto(RatingEntity rating);
 
 }

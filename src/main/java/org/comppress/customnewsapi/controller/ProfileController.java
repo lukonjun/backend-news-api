@@ -1,29 +1,23 @@
 package org.comppress.customnewsapi.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.*;
 import org.comppress.customnewsapi.dto.response.ResponseDto;
 import org.comppress.customnewsapi.exceptions.EmailAlreadyExistsException;
 import org.comppress.customnewsapi.exceptions.EmailSenderException;
 import org.comppress.customnewsapi.service.article.ArticleService;
 import org.comppress.customnewsapi.service.profile.ProfileService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
 @RestController
+@RequiredArgsConstructor
 public class ProfileController {
 
     private final ProfileService profileService;
     private final ArticleService articleService;
-
-    @Autowired
-    public ProfileController(ProfileService profileService,
-                             ArticleService articleService) {
-        this.profileService = profileService;
-        this.articleService = articleService;
-    }
 
     @PostMapping(value = "/forgot-password")
     public ResponseEntity<ResponseDto> sendOtp(@RequestBody @Valid ForgetPasswordDto forgetPasswordDto) throws EmailSenderException, EmailAlreadyExistsException {

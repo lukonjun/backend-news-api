@@ -1,4 +1,4 @@
-FROM openjdk:15-jdk-alpine
+FROM openjdk:17-jdk-alpine
 COPY target/application.jar /opt/
 # Create a group and user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

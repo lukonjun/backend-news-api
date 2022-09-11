@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AuthenticationException extends Exception{
+public class RatingIsInvalidException extends RuntimeException {
     private String message;
     private String variable;
 }

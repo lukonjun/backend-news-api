@@ -1,8 +1,9 @@
 package org.comppress.customnewsapi.controller;
 
-import org.comppress.customnewsapi.dto.*;
+import lombok.RequiredArgsConstructor;
+import org.comppress.customnewsapi.dto.GenericPage;
+import org.comppress.customnewsapi.dto.PublisherDto;
 import org.comppress.customnewsapi.service.publisher.PublisherService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,14 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/publishers")
+@RequiredArgsConstructor
 public class PublisherController {
 
     private final PublisherService publisherService;
-
-    @Autowired
-    public PublisherController(PublisherService publisherService) {
-        this.publisherService = publisherService;
-    }
 
     @GetMapping
     public ResponseEntity<GenericPage<PublisherDto>> getPublisher(

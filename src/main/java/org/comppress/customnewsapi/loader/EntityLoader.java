@@ -1,23 +1,14 @@
 package org.comppress.customnewsapi.loader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.comppress.customnewsapi.dto.json.PublisherDto;
-import org.comppress.customnewsapi.dto.json.RootDto;
-import org.comppress.customnewsapi.dto.xml.RssDto;
-import org.comppress.customnewsapi.entity.Category;
-import org.comppress.customnewsapi.entity.Publisher;
-import org.comppress.customnewsapi.entity.RssFeed;
 import org.comppress.customnewsapi.repository.CategoryRepository;
 import org.comppress.customnewsapi.repository.RssFeedRepository;
 import org.comppress.customnewsapi.repository.PublisherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
 
 @Component

@@ -1,13 +1,13 @@
 package org.comppress.customnewsapi.entity;
 
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
 @Data
-public class Criteria extends AbstractEntity{
+@Table(name = "criteria")
+public class CriteriaEntity extends AbstractEntity{
     private String name;
 }

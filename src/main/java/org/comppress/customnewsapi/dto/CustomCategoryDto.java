@@ -1,6 +1,7 @@
 package org.comppress.customnewsapi.dto;
 
 import lombok.Data;
+import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
 
 @Data
 public class CustomCategoryDto {

@@ -1,17 +1,18 @@
 package org.comppress.customnewsapi.repository;
 
-import org.comppress.customnewsapi.entity.Publisher;
+import org.comppress.customnewsapi.entity.PublisherEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface PublisherRepository extends JpaRepository<Publisher,Long> {
+public interface PublisherRepository extends JpaRepository<PublisherEntity,Long> {
 
     Boolean existsByName(String name);
-    Publisher findByName(String name);
-    List<Publisher> findByLang(String lang);
-    Page<Publisher> findByLang(String lang, Pageable pageable);
+    PublisherEntity findByName(String name);
+    PublisherEntity findByNameAndLang(String name, String lang);
+    List<PublisherEntity> findByLang(String lang);
+    Page<PublisherEntity> findByLang(String lang, Pageable pageable);
 
 }

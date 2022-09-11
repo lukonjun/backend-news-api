@@ -3,10 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [development]
-    paths:
-      - src/**
-      - helm/**
-      - Dockerfile
+#    paths:
+#      - src/**
+#      - helm/**
 
 jobs:
   build-and-push-development:
