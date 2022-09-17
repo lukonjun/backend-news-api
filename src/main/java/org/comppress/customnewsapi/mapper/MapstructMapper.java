@@ -29,7 +29,9 @@ public interface MapstructMapper {
 
     CriteriaDto criteriaToCriteriaDto(CriteriaEntity criteria);
     CategoryDto categoryToCategoryDto(CategoryEntity category);
+    CategoryUserDto categoryToCategoryUserDto(CategoryEntity category);
     PublisherDto publisherToPublisherDto(PublisherEntity publisher);
+    PublisherUserDto publisherToPublisherUserDto(PublisherEntity publisher);
 
     @Mapping(source = "publishedAt", target = "publishedAt", dateFormat = "yyyy-MM-dd HH:mm:ss.S")
     CustomRatedArticleDto customRatedArticleToCustomRatedArticleDto(CustomRatedArticle customRatedArticle);

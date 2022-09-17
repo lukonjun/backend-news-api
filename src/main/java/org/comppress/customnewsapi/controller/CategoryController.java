@@ -2,6 +2,7 @@ package org.comppress.customnewsapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.CategoryDto;
+import org.comppress.customnewsapi.dto.CategoryUserDto;
 import org.comppress.customnewsapi.service.category.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,7 @@ public class CategoryController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<CategoryDto>> getCategoriesUser(
+    public ResponseEntity<List<CategoryUserDto>> getCategoriesUser(
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang
     ){
         return categoryService.getCategoriesUser(lang);

@@ -1,6 +1,7 @@
 package org.comppress.customnewsapi.service.category;
 
 import org.comppress.customnewsapi.dto.CategoryDto;
+import org.comppress.customnewsapi.dto.CategoryUserDto;
 import org.comppress.customnewsapi.entity.CategoryEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
 import org.comppress.customnewsapi.mapper.MapstructMapper;
@@ -13,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,25 +45,31 @@ public class CategoryService {
      * @param lang
      * @return
      */
-    public ResponseEntity<List<CategoryDto>> getCategoriesUser(String lang) {
-
+    public ResponseEntity<List<CategoryUserDto>> getCategoriesUser(String lang) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserEntity userEntity = userRepository.findByUsernameAndDeletedFalse(authentication.getName());
 
         if(userEntity.getListCategoryIds() == null || userEntity.getListCategoryIds().isEmpty() || doesNotContainAnyCategoriesFromLang(userEntity.getListCategoryIds(),lang)){
             List<CategoryEntity> categoryEntityList = categoryRepository.findByLang(lang);
-            List<CategoryDto> categoryDtoList = categoryEntityList.stream().map(mapstructMapper::categoryToCategoryDto).collect(Collectors.toList());
-            return ResponseEntity.status(HttpStatus.OK).body(categoryDtoList);
+            List<CategoryUserDto> categoryUserDtoList = categoryEntityList.stream().map(category -> {
+                CategoryUserDto categoryUserDto = mapstructMapper.categoryToCategoryUserDto(category);
+                categoryUserDto.setSelected(true);
+                return categoryUserDto;
+            }).collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.OK).body(categoryUserDtoList);
         } else {
             List<Long> categoryIdList = Stream.of(userEntity.getListCategoryIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
-
-            List<CategoryDto> categoryDtoList = new ArrayList<>();
-            categoryRepository.findByLang(lang).stream().forEach(category -> {
+            List<CategoryEntity> categoryEntityList = categoryRepository.findByLang(lang);
+            List<CategoryUserDto> categoryUserDtoList = categoryEntityList.stream().map(category -> {
+                CategoryUserDto categoryUserDto = mapstructMapper.categoryToCategoryUserDto(category);
                 if(categoryIdList.contains(category.getId())){
-                    categoryDtoList.add(mapstructMapper.categoryToCategoryDto(category));
+                    categoryUserDto.setSelected(true);
+                }else{
+                    categoryUserDto.setSelected(false);
                 }
-            });
-            return ResponseEntity.status(HttpStatus.OK).body(categoryDtoList);
+                return categoryUserDto;
+            }).collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.OK).body(categoryUserDtoList);
         }
     }
 

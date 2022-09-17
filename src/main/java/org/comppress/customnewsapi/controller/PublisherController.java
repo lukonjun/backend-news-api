@@ -2,6 +2,7 @@ package org.comppress.customnewsapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.PublisherDto;
+import org.comppress.customnewsapi.dto.PublisherUserDto;
 import org.comppress.customnewsapi.service.publisher.PublisherService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,7 @@ public class PublisherController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<PublisherDto>> getPublisherUser(
+    public ResponseEntity<List<PublisherUserDto>> getPublisherUser(
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang
     ){
         return publisherService.getPublisherUser(lang);
