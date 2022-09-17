@@ -42,7 +42,7 @@ scheduler:
   news-feed:
     triggeringIntervalMilliSeconds: 300000
     initialDelayIntervalMilliSeconds: 5000
-    enabled: no
+    enabled: yes
   paywall:
     triggeringIntervalMilliSeconds: 30000
     initialDelayIntervalMilliSeconds: 10000
@@ -51,7 +51,7 @@ scheduler:
   twitter:
     triggeringIntervalMilliSeconds: 600000
     initialDelayIntervalMilliSeconds: 15000
-    enabled: no
+    enabled: yes
 jwt:
   secret: secret
 executor:
