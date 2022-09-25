@@ -311,9 +311,9 @@ public class ArticleService {
             log.info(fromDate);
         }
 
-        log.info("Request Parameter for /custom-news-api/articles/rated: ");
-        log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, filterOutPaywallArticles: {}, guid: {}", page, size, categoryId, listPublisherIds, lang,
-                 fromDate, toDate, filterOutPaywallArticles, guid);
+        //log.info("Request Parameter for /custom-news-api/articles/rated: ");
+        //log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, filterOutPaywallArticles: {}, guid: {}", page, size, categoryId, listPublisherIds, lang,
+        //         fromDate, toDate, filterOutPaywallArticles, guid);
 
         UserEntity userEntity = null;
         if (guid == null) {
@@ -382,36 +382,7 @@ public class ArticleService {
                 DateUtils.stringToLocalDateTime(fromDate),
                 DateUtils.stringToLocalDateTime(toDate));
 
-        List<CustomRatedArticleDto> customRatedArticleDtoList = new ArrayList<>();
-        articleList.forEach(customRatedArticle -> {
-            CustomRatedArticleDto customRatedArticleDto = new CustomRatedArticleDto();
-            BeanUtils.copyProperties(customRatedArticle, customRatedArticleDto);
-            customRatedArticleDtoList.add(customRatedArticleDto);
-        });
-        return PageHolderUtils.getResponseEntityGenericPage(page, size, customRatedArticleDtoList);
-    }
-
-    public ResponseEntity<GenericPage> getPersonalRatedArticlesFromUser(int page, int size, String fromDate, String toDate) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserEntity userEntity = userRepository.findByUsernameAndDeletedFalse(authentication.getName());
-
-        List<CustomRatedArticle> customRatedArticles =
-                articleRepository.retrieveAllPersonalRatedArticlesInDescOrder(
-                        userEntity.getId(),
-                        DateUtils.stringToLocalDateTime(fromDate),
-                        DateUtils.stringToLocalDateTime(toDate)
-                );
-
-        List<CustomRatedArticleDto> customRatedArticleDtoList = new ArrayList<>();
-        customRatedArticles.forEach(customRatedArticle -> {
-            CustomRatedArticleDto customRatedArticleDto = new CustomRatedArticleDto();
-            BeanUtils.copyProperties(customRatedArticle, customRatedArticleDto);
-            if (customRatedArticle.getCountComment() == null) {
-                customRatedArticleDto.setCountComment(0);
-            }
-            customRatedArticleDtoList.add(customRatedArticleDto);
-        });
+        List<CustomRatedArticleDto> customRatedArticleDtoList = articleList.stream().map(mapstructMapper::customRatedArticleToCustomRatedArticleDto).collect(Collectors.toList());
 
         return PageHolderUtils.getResponseEntityGenericPage(page, size, customRatedArticleDtoList);
     }
