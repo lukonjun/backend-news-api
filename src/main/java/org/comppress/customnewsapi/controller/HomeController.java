@@ -1,6 +1,7 @@
 package org.comppress.customnewsapi.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.service.home.HomeService;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/home")
 @RequiredArgsConstructor
+@Slf4j
 public class HomeController {
 
     private final HomeService homeService;
@@ -29,6 +31,9 @@ public class HomeController {
             @RequestParam(value = "toDate", required = false) String toDate,
             @RequestParam(value = "filterOutPaywallArticles", required = false, defaultValue = "false") Boolean filterOutPaywallArticles
     ) {
+        log.info("Request Parameter for /home");
+        log.info("page: {}, size: {}, lang: {}, categoryIds: {}, publisherIds: {}, fromDate: {}, toDate: {}, filterOutPaywallArticles: {}",
+                page, size, lang, categoryIds, publisherIds, fromDate, toDate, filterOutPaywallArticles);
         return homeService.getHome(page, size, lang, categoryIds, publisherIds, fromDate, toDate, filterOutPaywallArticles);
     }
 

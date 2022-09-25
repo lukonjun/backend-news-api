@@ -34,6 +34,10 @@ spring:
           starttls:
             enable: true
     protocol: smtp
+  flyway:
+    baseline-on-migrate: true
+# Enable logging for Flyway?
+
 server:
   port: 8080
   servlet:
@@ -42,16 +46,16 @@ scheduler:
   news-feed:
     triggeringIntervalMilliSeconds: 300000
     initialDelayIntervalMilliSeconds: 5000
-    enabled: yes
+    enabled: no
   paywall:
     triggeringIntervalMilliSeconds: 30000
     initialDelayIntervalMilliSeconds: 10000
-    enabled: yes
+    enabled: no
     page-size: 100
   twitter:
     triggeringIntervalMilliSeconds: 600000
     initialDelayIntervalMilliSeconds: 15000
-    enabled: yes
+    enabled: no
 jwt:
   secret: secret
 executor:

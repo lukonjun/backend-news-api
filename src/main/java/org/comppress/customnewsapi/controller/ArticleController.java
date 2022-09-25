@@ -1,5 +1,6 @@
 package org.comppress.customnewsapi.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.comppress.customnewsapi.dto.article.CustomArticleDto;
 import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.exceptions.AuthenticationException;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/articles")
+@Slf4j
 public class ArticleController {
 
     private final ArticleService articleService;
@@ -37,6 +39,9 @@ public class ArticleController {
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate
     ) {
+        log.info("Request Parameter for /articles");
+        log.info("page: {}, size: {}, title: {}, category: {}, publisherNewsPaper: {}, lang: {}, filterOutPaywallArticles: {}, fromDate: {}, toDate: {}",
+                page, size, title, category, publisherNewsPaper, lang, filterOutPaywallArticles, fromDate, toDate);
         return articleService.getArticles(page, size, title, category, publisherNewsPaper, lang, filterOutPaywallArticles, fromDate, toDate);
     }
 
@@ -51,6 +56,9 @@ public class ArticleController {
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate
     ) {
+        log.info("Request Parameter for /articles/unrated");
+        log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, filterOutPaywallArticles: {}, fromDate: {}, toDate: {}",
+                page, size, categoryId, listPublisherIds, lang, filterOutPaywallArticles, fromDate, toDate);
         return articleService.getArticlesNotRated(page, size, categoryId, listPublisherIds, lang, filterOutPaywallArticles, fromDate, toDate);
     }
 
@@ -67,6 +75,9 @@ public class ArticleController {
             @RequestParam(value = "guid", required = false) String guid
     ) {
         try {
+            log.info("Request Parameter for /articles/rated");
+            log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, filterOutPaywallArticles: {}, guid: {}",
+                    page, size, categoryId, listPublisherIds, lang, fromDate, toDate, filterOutPaywallArticles, guid);
             return articleService.getRatedArticles(page, size, categoryId, listPublisherIds, lang, fromDate, toDate, filterOutPaywallArticles, guid);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -80,8 +91,11 @@ public class ArticleController {
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate
     ) {
+        log.info("Request Parameter for /articles/rated/user");
+        log.info("page: {}, size: {}, fromDate: {}, toDate: {}",
+                page, size, fromDate, toDate);
+
         return articleService.getRatedArticlesFromUser(page, size, fromDate, toDate);
     }
-
 
 }
