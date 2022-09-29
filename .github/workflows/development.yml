@@ -40,7 +40,7 @@ jobs:
           --values stage.yml
           --set image.tag="dev-${{ github.run_id }}"
           --set ingress.host="api.staging.comppress.org"
-          --set ingress.tls-secret="staging-secret"
+          --set ingress.secret="staging-secret"
           --set env.SPRING_DATASOURCE_PASSWORD="${{ secrets.STAGE_DB_PASSWORD }}"
           --set env.SPRING_DATASOURCE_USERNAME=lucas
           --set env.SPRING_DATASOURCE_URL="${{ secrets.DEV_DB_CONNECTION_STRING }}"
