@@ -34,11 +34,13 @@ jobs:
       - name: helm deploy
         run: >
           helm upgrade
-          --install news-api-dev ./news-api
-          --namespace development
+          --install news-api-staging ./news-api
+          --namespace default
+          --create-namespace
           --values stage.yml
           --set image.tag="dev-${{ github.run_id }}"
-          --set ingress.host="dev.lukonjun.de"
+          --set ingress.host="api.staging.comppress.org"
+          --set ingress.tls-secret="staging-secret"
           --set env.SPRING_DATASOURCE_PASSWORD="${{ secrets.STAGE_DB_PASSWORD }}"
           --set env.SPRING_DATASOURCE_USERNAME=lucas
           --set env.SPRING_DATASOURCE_URL="${{ secrets.DEV_DB_CONNECTION_STRING }}"
