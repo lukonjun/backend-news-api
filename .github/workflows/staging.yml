@@ -1,11 +1,15 @@
-name: Pipeline Stage
+name: Pipeline Staging
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+<<<<<<< HEAD:.github/workflows/staging.yml
+    branches: [staging]
+=======
+    branches: [development]
+>>>>>>> 6bf8e1f39a74fce3dd7d1e74f1914cd8b3ace62e:.github/workflows/development.yml
 
 jobs:
-  build-and-push-stage:
+  build-and-push-staging:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,11 +20,11 @@ jobs:
       - name: Build jar with Maven
         run: mvn clean install -Dmaven.test.skip=true
       - name: Build Container Image
-        run: docker build --tag ghcr.io/lukonjun/custom-news-api:${{ github.run_id }} .
+        run: docker build --tag ghcr.io/lukonjun/custom-news-api:stg-${{ github.run_id }} .
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Run docker push
-        run: docker push ghcr.io/lukonjun/custom-news-api:${{ github.run_id }}
+        run: docker push ghcr.io/lukonjun/custom-news-api:stg-${{ github.run_id }}
       - name: kubectl set up
         run: |
           mkdir ~/.kube/
@@ -30,16 +34,13 @@ jobs:
         run: kubectl get nodes
       - name: helm deploy
         run: >
-          helm upgrade 
-          --install news-api ./news-api
-          --namespace default
-          --create-namespace
-          --values stage.yml 
-          --set image.tag="${{ github.run_id }}"
-          --set ingress.host="api.comppress.org"
-          --set ingress.secret="staging-secret"
-          --set env.SPRING_DATASOURCE_PASSWORD="${{ secrets.STAGE_DB_PASSWORD }}" 
-          --set env.SPRING_DATASOURCE_USERNAME=lucas 
-          --set env.SPRING_DATASOURCE_URL="${{ secrets.DB_CONNECTION_STRING }}" 
+          helm upgrade
+          --install api-staging ./news-api
+          --namespace staging --create-namespace
+          --values staging.yml
+          --set image.tag="stg-${{ github.run_id }}"
+          --set env.SPRING_DATASOURCE_PASSWORD="${{ secrets.STAGE_DB_PASSWORD }}"
+          --set env.SPRING_DATASOURCE_USERNAME=lucas
+          --set env.SPRING_DATASOURCE_URL="${{ secrets.DEV_DB_CONNECTION_STRING }}"
           --set env.SPRING_MAIL_PASSWORD="${{ secrets.STAGE_MAIL_PASSWORD }}"
         working-directory: ./helm
