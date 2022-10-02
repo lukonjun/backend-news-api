@@ -41,7 +41,10 @@ service:
   port: 80
 
 ingress:
+  enabled: false
   host: example.com
+  issuer: default-issuer
+  class: nginx
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

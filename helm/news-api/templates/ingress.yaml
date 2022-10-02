@@ -5,8 +5,13 @@ metadata:
   labels:
     {{- include "news-api.labels" . | nindent 4 }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+    cert-manager.io/issuer: {{ .Values.ingress.issuer }}
 spec:
+  tls:
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: example-tls
   rules:
   - host: {{ .Values.ingress.host }}
     http:
