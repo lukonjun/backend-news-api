@@ -24,6 +24,9 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
     @Query(value = "SELECT * FROM article ORDER BY RAND() LIMIT :numberArticles ", nativeQuery = true)
     List<ArticleEntity> retrieveRandomArticles(@Param("numberArticles") Integer numberArticles);
 
+    @Query(value = "SELECT * FROM article WHERE date_created >= NOW() - INTERVAL 1 DAY ORDER BY RAND() LIMIT 1", nativeQuery = true)
+    ArticleEntity retrieveOneRandomArticleIntervalOneDay();
+
     @Query(value = """
             Select a.id, a.author, a.title, a.description, a.url, a.url_to_image as urlToImage, a.published_at as publishedAt,
                    a.count_ratings as countRatings, a.count_comment as countComment, a.paywall_article as paywallArticle, a.scale_image as scaleImage,
