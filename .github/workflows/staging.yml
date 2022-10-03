@@ -2,11 +2,7 @@ name: Pipeline Staging
 on:
   workflow_dispatch:
   push:
-<<<<<<< HEAD:.github/workflows/staging.yml
     branches: [staging]
-=======
-    branches: [development]
->>>>>>> 6bf8e1f39a74fce3dd7d1e74f1914cd8b3ace62e:.github/workflows/development.yml
 
 jobs:
   build-and-push-staging:
