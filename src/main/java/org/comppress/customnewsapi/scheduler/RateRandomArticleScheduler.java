@@ -40,6 +40,7 @@ public class RateRandomArticleScheduler {
             if(enabled){
                 log.info("Random Article Scheduler Running!");
                 ArticleEntity article = articleRepository.retrieveOneRandomArticleIntervalOneDay();
+                if(article == null) return;
                 String guid = "RandomArticleSchedulerGuid";
                 Random random = new Random();
 
