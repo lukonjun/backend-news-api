@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.home;
+package org.comppress.customnewsapi.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +17,6 @@ import org.comppress.customnewsapi.repository.ArticleRepository;
 import org.comppress.customnewsapi.repository.CategoryRepository;
 import org.comppress.customnewsapi.repository.PublisherRepository;
 import org.comppress.customnewsapi.repository.UserRepository;
-import org.comppress.customnewsapi.service.BaseSpecification;
-import org.comppress.customnewsapi.service.twitter.TwitterService;
 import org.comppress.customnewsapi.utils.DateUtils;
 import org.comppress.customnewsapi.utils.PageHolderUtils;
 import org.springframework.beans.BeanUtils;
@@ -120,7 +118,7 @@ public class HomeService implements BaseSpecification {
     public ResponseEntity<GenericPage> getHome(int page, int size, String lang, List<Long> categoryIds,
                                                List<Long> publisherIds, String fromDate, String toDate, Boolean filterOutPaywallArticles) {
         // if fromDate and toDate null retrieve the last 24 hours
-        fromDate = getDate(fromDate, toDate);
+        //fromDate = getDate(fromDate, toDate);
 
         // retrieve all publisherIds of lang if null or empty, also retrieve if user has configured publisher preferences
         final List<Long> finalPubIds = getPublisher(publisherIds, lang);
@@ -129,13 +127,13 @@ public class HomeService implements BaseSpecification {
         // makes sure only CategoryIds of language are returned
         categoryIds = getCategory(categoryIds, lang);
 
-        String finalFromDate = fromDate;
+        //String finalFromDate = fromDate;
         List<CategoryEntity> categoryEntityList = categoryRepository.findByCategoryIds(categoryIds);
 
         // For every category in categoryEntityList retrieve news
         List<CustomCategoryDto> customCategoryDtos = categoryEntityList.stream().map(
                 category -> getArticlesForCategory(category, lang,
-                        finalPubIds, DateUtils.stringToLocalDateTime(finalFromDate), DateUtils.stringToLocalDateTime(toDate), filterOutPaywallArticles)
+                        finalPubIds, DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), filterOutPaywallArticles)
         ).collect(Collectors.toList());
         return PageHolderUtils.getResponseEntityGenericPage(page, size, customCategoryDtos);
     }
@@ -153,12 +151,7 @@ public class HomeService implements BaseSpecification {
 
     private CustomCategoryDto getArticlesForCategory(CategoryEntity category, String lang,
                                                      List<Long> publisherIds, LocalDateTime fromDate, LocalDateTime toDate, Boolean filterOutPaywallArticles) {
-        // TODO Limit 1, Publishers included, Rated
-        /*
-        if (publisherIds == null || publisherIds.isEmpty()) {
-            publisherIds = publisherRepository.findByLang(lang).stream().map(AbstractEntity::getId).collect(Collectors.toList());
-        }
-         */
+
         Long categoryId = category.getId();
         CustomRatedArticle article = articleRepository.retrieveOneRatedArticleByCategoryIdsAndPublisherIdsAndLanguageAndLimit(categoryId, publisherIds, lang, fromDate, toDate, filterOutPaywallArticles);
         CustomCategoryDto customCategoryDto = new CustomCategoryDto();

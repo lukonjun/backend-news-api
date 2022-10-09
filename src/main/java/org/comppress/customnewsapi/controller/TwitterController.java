@@ -2,7 +2,7 @@ package org.comppress.customnewsapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.TwitterArticleDto;
-import org.comppress.customnewsapi.service.twitter.TwitterService;
+import org.comppress.customnewsapi.service.TwitterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

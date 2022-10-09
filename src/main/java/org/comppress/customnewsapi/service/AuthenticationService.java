@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.authservice;
+package org.comppress.customnewsapi.service;
 
 import org.comppress.customnewsapi.entity.UserEntity;
 import org.comppress.customnewsapi.repository.UserRepository;

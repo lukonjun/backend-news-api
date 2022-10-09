@@ -96,28 +96,21 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
                    rf.category_id as categoryId, rf.publisher_id as publisherId,
                    c.name as categoryName,
                    p.name as publisherName,
-                   t.average_rating_criteria_1 as averageRatingCriteria1, t.average_rating_criteria_2 as averageRatingCriteria2, t.average_rating_criteria_3 as averageRatingCriteria3,
-                   sum(t.average_rating_criteria_1 + t.average_rating_criteria_2 + t.average_rating_criteria_3)/
-                   (CASE WHEN t.average_rating_criteria_1 IS NULL THEN 0 ELSE 1 END + 
-                   CASE WHEN t.average_rating_criteria_2 IS NULL THEN 0 ELSE 1 END + 
-                   CASE WHEN t.average_rating_criteria_3 IS NULL THEN 0 ELSE 1 END)
-                       AS totalAverageRating from (
-                           SELECT distinct r.article_id,
-                                           (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=1) as average_rating_criteria_1,
-                                           (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=2) as average_rating_criteria_2,
-                                           (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=3) as average_rating_criteria_3
-                           FROM rating r group by r.article_id
-                       )as t
-                           INNER JOIN article a ON a.id= t.article_id
-                           INNER JOIN rss_feed rf ON rf.id = a.rss_feed_id
-                           INNER JOIN category c ON c.id = rf.category_id
-                           INNER JOIN publisher p ON p.id = rf.publisher_id
+                   v.average_rating_criteria_1 as averageRatingCriteria1,
+                   v.average_rating_criteria_2 as averageRatingCriteria2,
+                   v.average_rating_criteria_3 as averageRatingCriteria3,
+                   v.total_average_rating as totalAverageRating
+            FROM VTotalAverageRatingEachArticle v
+                   INNER JOIN article a ON a.id= v.article_id
+                   INNER JOIN rss_feed rf ON rf.id = a.rss_feed_id
+                   INNER JOIN category c ON c.id = rf.category_id
+                   INNER JOIN publisher p ON p.id = rf.publisher_id
             WHERE rf.category_id = :categoryId
               AND rf.publisher_id in (:publisherIds)
               AND (:language is null or :language = '' or rf.lang LIKE :language)
               AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
-              AND a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now())
-            group by t.article_id order by totalAverageRating DESC
+              AND a.published_at BETWEEN IFNULL(:fromDate, NOW() - INTERVAL 1 DAY) AND IFNULL(:toDate,now())
+            group by v.article_id order by totalAverageRating DESC
             """, nativeQuery = true)
     List<CustomRatedArticle> retrieveAllRatedArticlesInDescOrder(
             @Param("categoryId") Long categoryId,
@@ -134,28 +127,21 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
                    rf.category_id as categoryId, rf.publisher_id as publisherId,
                    c.name as categoryName,
                    p.name as publisherName,
-            t.average_rating_criteria_1 as averageRatingCriteria1, t.average_rating_criteria_2 as averageRatingCriteria2, t.average_rating_criteria_3 as averageRatingCriteria3,
-                   sum(t.average_rating_criteria_1 + t.average_rating_criteria_2 + t.average_rating_criteria_3)/
-                   (CASE WHEN t.average_rating_criteria_1 IS NULL THEN 0 ELSE 1 END +
-                    CASE WHEN t.average_rating_criteria_2 IS NULL THEN 0 ELSE 1 END +
-                    CASE WHEN t.average_rating_criteria_3 IS NULL THEN 0 ELSE 1 END)
-                        AS totalAverageRating from (
-                            SELECT distinct r.article_id,
-                                          (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=1) as average_rating_criteria_1,
-                                          (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=2) as average_rating_criteria_2,
-                                          (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=3) as average_rating_criteria_3
-                            FROM rating r group by r.article_id
-                        )as t
-                            INNER JOIN article a ON a.id= t.article_id
-                            INNER JOIN rss_feed rf ON rf.id = a.rss_feed_id
-                            INNER JOIN category c ON c.id = rf.category_id
-                            INNER JOIN publisher p ON p.id = rf.publisher_id
-                       WHERE ( rf.lang = :lang )
+                   v.average_rating_criteria_1 as averageRatingCriteria1,
+                   v.average_rating_criteria_2 as averageRatingCriteria2,
+                   v.average_rating_criteria_3 as averageRatingCriteria3,
+                   v.total_average_rating as totalAverageRating
+            FROM VTotalAverageRatingEachArticle v
+                   INNER JOIN article a ON a.id = v.article_id
+                   INNER JOIN rss_feed rf ON rf.id = a.rss_feed_id
+                   INNER JOIN category c ON c.id = rf.category_id
+                   INNER JOIN publisher p ON p.id = rf.publisher_id
+           WHERE ( rf.lang = :lang )
                          AND c.id = :categoryId
                          AND p.id in :publisherIds
                          AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
-                         AND a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now())
-                        group by t.article_id order by totalAverageRating DESC LIMIT 1
+                         AND a.published_at BETWEEN IFNULL(:fromDate, NOW() - INTERVAL 1 DAY) AND IFNULL(:toDate,now())
+        group by v.article_id order by totalAverageRating DESC LIMIT 1
                         """, nativeQuery = true)
     CustomRatedArticle retrieveOneRatedArticleByCategoryIdsAndPublisherIdsAndLanguageAndLimit(
             @Param("categoryId") Long categoryId,
@@ -211,29 +197,23 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
                    rf.category_id as categoryId, rf.publisher_id as publisherId,
                    c.name as categoryName,
                    p.name as publisherName,
-            t.average_rating_criteria_1 as averageRatingCriteria1, t.average_rating_criteria_2 as averageRatingCriteria2, t.average_rating_criteria_3 as averageRatingCriteria3,
-            sum(t.average_rating_criteria_1 + t.average_rating_criteria_2 + t.average_rating_criteria_3)/
-            (CASE WHEN  t.average_rating_criteria_1 IS NULL THEN 0 ELSE 1 END + 
-            CASE WHEN t.average_rating_criteria_2 IS NULL THEN 0 ELSE 1 END + 
-            CASE WHEN t.average_rating_criteria_3 IS NULL THEN 0 ELSE 1 END) AS totalAverageRating 
-            from (SELECT distinct r.article_id, r.user_id,  
-                (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=1) as average_rating_criteria_1, 
-                (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=2) as average_rating_criteria_2, 
-                (select avg(r1.rating) from rating r1 where r1.article_id = r.article_id AND r1.criteria_id=3) as average_rating_criteria_3 
-            FROM rating r group by r.article_id, r.user_id) as t 
-              INNER JOIN article a ON a.id= t.article_id 
-              INNER JOIN rss_feed rf ON rf.id = a.rss_feed_id 
-              INNER JOIN category c ON c.id = rf.category_id 
-              INNER JOIN publisher p ON p.id = rf.publisher_id 
+                   v.average_rating_criteria_1 as averageRatingCriteria1,
+                   v.average_rating_criteria_2 as averageRatingCriteria2,
+                   v.average_rating_criteria_3 as averageRatingCriteria3,
+                   v.total_average_rating as totalAverageRating
+            FROM VGroupByUserIdArticleIdOwnUserRating v
+                   INNER JOIN article a ON a.id = v.article_id
+                   INNER JOIN rss_feed rf ON rf.id = a.rss_feed_id
+                   INNER JOIN category c ON c.id = rf.category_id
+                   INNER JOIN publisher p ON p.id = rf.publisher_id
             WHERE count_ratings > 0 
-              AND t.user_id = :userId 
+              AND v.user_id = :userId 
               AND a.published_at BETWEEN IFNULL(:fromDate, '1900-01-01 00:00:00') AND IFNULL(:toDate,now()) 
-            group by t.article_id order by totalAverageRating DESC;
+            group by v.article_id, v.user_id order by totalAverageRating DESC;
             """,nativeQuery = true)
     List<CustomRatedArticle> getRatedArticleFromUser(
             @Param("userId") Long userId,
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate
     );
-
 }

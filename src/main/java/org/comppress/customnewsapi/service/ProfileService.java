@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.profile;
+package org.comppress.customnewsapi.service;
 
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.ForgetPasswordDto;
@@ -13,7 +13,6 @@ import org.comppress.customnewsapi.exceptions.EmailSenderException;
 import org.comppress.customnewsapi.exceptions.PasswordNotMatchException;
 import org.comppress.customnewsapi.exceptions.UserNotFoundException;
 import org.comppress.customnewsapi.repository.UserRepository;
-import org.comppress.customnewsapi.service.email.EmailService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

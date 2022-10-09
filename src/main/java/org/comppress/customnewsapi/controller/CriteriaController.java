@@ -2,7 +2,7 @@ package org.comppress.customnewsapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.CriteriaDto;
-import org.comppress.customnewsapi.service.criteria.CriteriaService;
+import org.comppress.customnewsapi.service.CriteriaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

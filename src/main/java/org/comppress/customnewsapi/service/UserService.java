@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.user;
+package org.comppress.customnewsapi.service;
 
 import org.comppress.customnewsapi.dto.UserDto;
 import org.comppress.customnewsapi.entity.UserEntity;

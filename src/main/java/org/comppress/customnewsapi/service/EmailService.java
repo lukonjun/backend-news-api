@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.email;
+package org.comppress.customnewsapi.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

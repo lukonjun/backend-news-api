@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.article;
+package org.comppress.customnewsapi.service;
 
 
 import com.rometools.modules.mediarss.MediaEntryModule;
@@ -52,11 +52,7 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -237,6 +233,7 @@ public class ArticleService {
             article.setGuid(syndEntry.getUri());
         }
         if (syndEntry.getPublishedDate() != null) {
+            syndEntry.getPublishedDate();
             article.setPublishedAt(syndEntry.getPublishedDate().toInstant()
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime());
@@ -302,14 +299,6 @@ public class ArticleService {
     public ResponseEntity<GenericPage> getRatedArticles(int page, int size, Long categoryId,
                                                         List<Long> listPublisherIds, String lang,
                                                         String fromDate, String toDate, Boolean filterOutPaywallArticles, String guid) throws AuthenticationException {
-
-        if(fromDate == null && toDate == null){
-            Instant instant = Instant.now().minus(24, ChronoUnit.HOURS);
-            Timestamp timestamp = Timestamp.from(instant);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            fromDate = timestamp.toLocalDateTime().format(formatter);
-            log.info(fromDate);
-        }
 
         //log.info("Request Parameter for /custom-news-api/articles/rated: ");
         //log.info("page: {}, size: {}, categoryId: {}, listPublisherIds: {}, lang: {}, fromDate: {}, toDate: {}, filterOutPaywallArticles: {}, guid: {}", page, size, categoryId, listPublisherIds, lang,

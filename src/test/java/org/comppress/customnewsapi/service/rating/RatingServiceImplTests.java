@@ -16,6 +16,7 @@ import org.comppress.customnewsapi.repository.CriteriaRepository;
 import org.comppress.customnewsapi.repository.RatingRepository;
 import org.comppress.customnewsapi.repository.UserRepository;
 import org.comppress.customnewsapi.security.AppAuthenticationService;
+import org.comppress.customnewsapi.service.RatingService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

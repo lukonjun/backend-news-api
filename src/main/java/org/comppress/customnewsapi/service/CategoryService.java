@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.category;
+package org.comppress.customnewsapi.service;
 
 import org.comppress.customnewsapi.dto.CategoryDto;
 import org.comppress.customnewsapi.dto.CategoryUserDto;

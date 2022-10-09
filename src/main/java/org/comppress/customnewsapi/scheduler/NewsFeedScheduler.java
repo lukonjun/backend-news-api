@@ -3,7 +3,7 @@ package org.comppress.customnewsapi.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.SchedulerLock;
-import org.comppress.customnewsapi.service.article.ArticleService;
+import org.comppress.customnewsapi.service.ArticleService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

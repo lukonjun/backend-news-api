@@ -8,7 +8,7 @@ import org.comppress.customnewsapi.dto.UserDto;
 import org.comppress.customnewsapi.dto.response.ResponseDto;
 import org.comppress.customnewsapi.exceptions.EmailAlreadyExistsException;
 import org.comppress.customnewsapi.exceptions.EmailSenderException;
-import org.comppress.customnewsapi.service.profile.ProfileService;
+import org.comppress.customnewsapi.service.ProfileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
