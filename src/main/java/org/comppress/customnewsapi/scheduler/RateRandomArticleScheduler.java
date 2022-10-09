@@ -9,7 +9,7 @@ import org.comppress.customnewsapi.entity.ArticleEntity;
 import org.comppress.customnewsapi.entity.CriteriaEntity;
 import org.comppress.customnewsapi.repository.ArticleRepository;
 import org.comppress.customnewsapi.repository.CriteriaRepository;
-import org.comppress.customnewsapi.service.rating.RatingService;
+import org.comppress.customnewsapi.service.RatingService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

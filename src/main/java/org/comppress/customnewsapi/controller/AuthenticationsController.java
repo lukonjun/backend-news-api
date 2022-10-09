@@ -6,7 +6,7 @@ import org.comppress.customnewsapi.dto.AuthRequestDto;
 import org.comppress.customnewsapi.dto.AuthResponseDto;
 import org.comppress.customnewsapi.dto.UserDto;
 import org.comppress.customnewsapi.security.JwtTokenUtil;
-import org.comppress.customnewsapi.service.user.UserService;
+import org.comppress.customnewsapi.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;

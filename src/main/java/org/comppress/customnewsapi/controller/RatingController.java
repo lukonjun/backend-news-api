@@ -3,7 +3,7 @@ package org.comppress.customnewsapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.SubmitRatingDto;
 import org.comppress.customnewsapi.dto.response.ResponseDto;
-import org.comppress.customnewsapi.service.rating.RatingService;
+import org.comppress.customnewsapi.service.RatingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

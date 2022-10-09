@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.twitter;
+package org.comppress.customnewsapi.service;
 
 import io.github.redouane59.twitter.TwitterClient;
 import io.github.redouane59.twitter.dto.tweet.Tweet;

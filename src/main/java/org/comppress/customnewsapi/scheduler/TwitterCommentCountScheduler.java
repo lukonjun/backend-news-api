@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.comppress.customnewsapi.repository.TwitterRepository;
-import org.comppress.customnewsapi.service.twitter.TwitterService;
+import org.comppress.customnewsapi.service.TwitterService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

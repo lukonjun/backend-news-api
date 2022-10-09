@@ -3,7 +3,7 @@ package org.comppress.customnewsapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.PublisherDto;
 import org.comppress.customnewsapi.dto.PublisherUserDto;
-import org.comppress.customnewsapi.service.publisher.PublisherService;
+import org.comppress.customnewsapi.service.PublisherService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

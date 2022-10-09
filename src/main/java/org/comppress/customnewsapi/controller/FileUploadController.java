@@ -5,7 +5,7 @@ import org.comppress.customnewsapi.dto.CategoryDto;
 import org.comppress.customnewsapi.dto.CriteriaDto;
 import org.comppress.customnewsapi.dto.PublisherDto;
 import org.comppress.customnewsapi.entity.RssFeedEntity;
-import org.comppress.customnewsapi.service.fileupload.FileUploadService;
+import org.comppress.customnewsapi.service.FileUploadService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

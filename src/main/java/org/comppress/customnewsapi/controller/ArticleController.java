@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.comppress.customnewsapi.dto.article.CustomArticleDto;
 import org.comppress.customnewsapi.dto.GenericPage;
 import org.comppress.customnewsapi.exceptions.AuthenticationException;
-import org.comppress.customnewsapi.service.article.ArticleService;
+import org.comppress.customnewsapi.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

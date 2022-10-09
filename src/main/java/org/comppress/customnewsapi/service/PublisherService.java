@@ -1,4 +1,4 @@
-package org.comppress.customnewsapi.service.publisher;
+package org.comppress.customnewsapi.service;
 
 import lombok.RequiredArgsConstructor;
 import org.comppress.customnewsapi.dto.PublisherDto;
