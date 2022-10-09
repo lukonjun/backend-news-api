@@ -35,8 +35,8 @@ jobs:
           --namespace production --create-namespace
           --values production.yml
           --set image.tag="${{ github.run_id }}" 
-          --set env.SPRING_DATASOURCE_PASSWORD="${{ secrets.STAGE_DB_PASSWORD }}" 
+          --set env.SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}"
           --set env.SPRING_DATASOURCE_USERNAME=lucas 
-          --set env.SPRING_DATASOURCE_URL="${{ secrets.DB_CONNECTION_STRING }}" 
-          --set env.SPRING_MAIL_PASSWORD="${{ secrets.STAGE_MAIL_PASSWORD }}"
+          --set env.SPRING_DATASOURCE_URL="${{ secrets.PRD_DB_CONNECTION_STRING }}"
+          --set env.SPRING_MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
         working-directory: ./helm
