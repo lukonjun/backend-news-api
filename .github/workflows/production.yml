@@ -40,8 +40,7 @@ jobs:
           --set env.SPRING_DATASOURCE_URL="${{ secrets.PRD_DB_CONNECTION_STRING }}"
           --set env.SPRING_MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
           --set env.TWITTER_ACCESS_TOKEN="${{ secrets.PRODUCTION_TWITTER_ACCESS_TOKEN }}"
-          --set env.TWITTER_ACCESS_TOKEN_SECRET:="${{ secrets.PRODUCTION_TWITTER_ACCESS_TOKEN_SECRET }}"
+          --set env.TWITTER_ACCESS_TOKEN_SECRET="${{ secrets.PRODUCTION_TWITTER_ACCESS_TOKEN_SECRET }}"
           --set env.TWITTER_API_KEY="${{ secrets.PRODUCTION_TWITTER_API_KEY }}"
           --set env.TWITTER_API_SECRET="${{ secrets.PRODUCTION_TWITTER_API_SECRET }}"
-
         working-directory: ./helm
