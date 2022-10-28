@@ -2,8 +2,10 @@ package org.comppress.customnewsapi.service;
 
 import io.github.redouane59.twitter.TwitterClient;
 import io.github.redouane59.twitter.dto.tweet.Tweet;
-import lombok.RequiredArgsConstructor;
+import io.github.redouane59.twitter.signature.TwitterCredentials;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.comppress.customnewsapi.config.TwitterConfiguration;
 import org.comppress.customnewsapi.dto.TwitterArticleDto;
 import org.comppress.customnewsapi.dto.article.ArticleDto;
 import org.comppress.customnewsapi.entity.ArticleEntity;
@@ -14,59 +16,42 @@ import org.comppress.customnewsapi.repository.TwitterRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import twitter4j.Status;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.User;
+import twitter4j.*;
+import twitter4j.conf.ConfigurationBuilder;
 
 import java.util.Optional;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class TwitterService {
 
     private final TwitterRepository twitterRepository;
     private final TwitterMapper twitterMapper;
     private final ArticleRepository articleRepository;
-    private final Twitter twitter;
-    private final TwitterClient twitterClient;
-
-    static String API_KEY = "3OcPF9Kg5bsCR1eYtMz4hixM1";
-    static String API_SECRET = "Q2LZCxGna2ckmMNtJW0f3eKhBRmtkMRhPOv50mVSBsGZKZGBb7";
-    static String ACCESS_TOKEN = "1444941818047700993-9PGTpStoWYUJDy5YIE1Sz1g9GKWDLc";
-    static String ACCESS_TOKEN_SECRET = "cwsR23PMMqa5XS3mzlU0G2oTtGzqIDps4V6tsjBn3kbpO";
+    private final TwitterConfiguration twitterConfiguration;
 
     public ResponseEntity<TwitterArticleDto> getTwitterArticle(Long id) {
 
-        TwitterTweetEntity twitterTweet = null;
+        TwitterTweetEntity twitterTweet;
         if((twitterTweet = twitterRepository.findByArticleId(id)) != null){
             TwitterArticleDto twitterArticleDto = twitterMapper.twitterArticleToTwitterArticleDto(twitterTweet);
             return ResponseEntity.status(HttpStatus.OK).body(twitterArticleDto);
         } else {
-            // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-update
-            // https://vhudyma-blog.eu/post-a-tweet-using-twitter-api/ (Java Script)
-            // https://github.com/twitterdev/Twitter-API-v2-sample-code
-            // https://vasisouv.github.io/twitter-api-tutorial/tutorial.html
-            // Create Article against Twitter API
-
-            Twitter twitterApi = twitter;
+            Twitter twitterApi = getTwitter();
             Optional<ArticleEntity> article = articleRepository.findById(id);
             Status status = null;
             try {
-                status = twitterApi.updateStatus("Hello Test URL " + article.get().getUrl());
+                // Update status of the Twitter profile
+                status = twitterApi.updateStatus(article.get().getUrl());
+                log.info("Status url: ",status.getURLEntities());
             } catch (TwitterException e) {
-                // Thorw Custom Exception
-                e.printStackTrace();
-                throw new RuntimeException("Could not Update Status (Tweet)");
+                throw new RuntimeException("Could not update status of Twitter profile");
             }
-            log.info("Status url: ",status.getURLEntities());
-            // Save new Twitter Article to Database
-            // Build URL String to access Tweet
-            // https://twitter.com/justano12715638
+
+            // Save Tweet in the database
             User user = status.getUser();
             String URL = "https://twitter.com/" + user.getScreenName() +"/status/" + status.getId();
-            log.info(URL);
             twitterTweet = new TwitterTweetEntity().builder()
                     .articleId(id)
                     .twitterId(status.getId())
@@ -78,10 +63,23 @@ public class TwitterService {
         }
     }
 
+    private Twitter getTwitter() {
+        ConfigurationBuilder cb = new ConfigurationBuilder();
+        cb.setDebugEnabled(true)
+                .setOAuthConsumerKey(twitterConfiguration.getApiKey())
+                .setOAuthConsumerSecret(twitterConfiguration.getApiSecret())
+                .setOAuthAccessToken(twitterConfiguration.getAccessToken())
+                .setOAuthAccessTokenSecret(twitterConfiguration.getAccessTokenSecret());
+        TwitterFactory tf = new TwitterFactory(cb.build());
+        Twitter twitter = tf.getInstance();
+        return twitter;
+    }
+
     public void getTweetDetails() {
         twitterRepository.findAll().forEach(t -> {
             if(t.getTwitterId() != null){
                 // Get List of Tweets?
+                TwitterClient twitterClient = getTwitterClient();
                 Tweet tweet  = twitterClient.getTweet(String.valueOf(t.getTwitterId()));
                 if(t.getReplyCount() != tweet.getReplyCount()){
                     t.setReplyCount(tweet.getReplyCount());
@@ -89,6 +87,15 @@ public class TwitterService {
                 }
             }
         });
+    }
+
+    private TwitterClient getTwitterClient() {
+        return new TwitterClient(TwitterCredentials.builder()
+                .accessToken(twitterConfiguration.getAccessToken())
+                .accessTokenSecret(twitterConfiguration.getAccessTokenSecret())
+                .apiKey(twitterConfiguration.getApiKey())
+                .apiSecretKey(twitterConfiguration.getApiSecret())
+                .build());
     }
 
     public void setReplyCount(ArticleDto articleDto) {

@@ -10,6 +10,10 @@ env:
   SPRING_DATASOURCE_URL: "jdbc:mysql://localhost:3306/comppress?allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true"
   SPRING_MAIL_PASSWORD: "1234"
   SERVER_PORT: 8080
+  TWITTER_API_KEY: "1234"
+  TWITTER_API_SECRET: "1234"
+  TWITTER_ACCESS_TOKEN: "1234"
+  TWITTER_ACCESS_TOKEN_SECRET: "1234"
   scheduler.news-feed.enabled: "yes"
   scheduler.paywall.enabled: "yes"
   scheduler.twitter.enabled: "yes"
