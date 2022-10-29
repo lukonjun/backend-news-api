@@ -16,8 +16,10 @@ import org.comppress.customnewsapi.repository.TwitterRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import twitter4j.*;
-import twitter4j.conf.ConfigurationBuilder;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.v1.Status;
+import twitter4j.v1.User;
 
 import java.util.Optional;
 
@@ -31,20 +33,27 @@ public class TwitterService {
     private final ArticleRepository articleRepository;
     private final TwitterConfiguration twitterConfiguration;
 
-    public ResponseEntity<TwitterArticleDto> getTwitterArticle(Long id) {
 
+    public ResponseEntity<TwitterArticleDto> getTwitterArticle(Long id) throws TwitterException {
+
+        if(!articleRepository.existsById(id)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
         TwitterTweetEntity twitterTweet;
         if((twitterTweet = twitterRepository.findByArticleId(id)) != null){
             TwitterArticleDto twitterArticleDto = twitterMapper.twitterArticleToTwitterArticleDto(twitterTweet);
             return ResponseEntity.status(HttpStatus.OK).body(twitterArticleDto);
         } else {
-            Twitter twitterApi = getTwitter();
+            var twitter = Twitter.newBuilder()
+                    .oAuthConsumer(twitterConfiguration.getApiKey(), twitterConfiguration.getApiSecret())
+                    .oAuthAccessToken(twitterConfiguration.getAccessToken(), twitterConfiguration.getAccessTokenSecret())
+                    .build();
             Optional<ArticleEntity> article = articleRepository.findById(id);
             Status status = null;
             try {
                 // Update status of the Twitter profile
-                status = twitterApi.updateStatus(article.get().getUrl());
-                log.info("Status url: ",status.getURLEntities());
+                status = twitter.v1().tweets().updateStatus(article.get().getUrl());
+                log.info("Status url: {}", (Object) status.getURLEntities());
             } catch (TwitterException e) {
                 throw new RuntimeException("Could not update status of Twitter profile");
             }
@@ -54,7 +63,7 @@ public class TwitterService {
             String URL = "https://twitter.com/" + user.getScreenName() +"/status/" + status.getId();
             twitterTweet = new TwitterTweetEntity().builder()
                     .articleId(id)
-                    .twitterId(status.getId())
+                    .twitterId(user.getId())
                     .twitterArticleUrl(URL)
                     .build();
             twitterRepository.save(twitterTweet);
@@ -64,6 +73,7 @@ public class TwitterService {
     }
 
     private Twitter getTwitter() {
+        /*
         ConfigurationBuilder cb = new ConfigurationBuilder();
         cb.setDebugEnabled(true)
                 .setOAuthConsumerKey(twitterConfiguration.getApiKey())
@@ -73,7 +83,10 @@ public class TwitterService {
         TwitterFactory tf = new TwitterFactory(cb.build());
         Twitter twitter = tf.getInstance();
         return twitter;
+        */
+        return null;
     }
+
 
     public void getTweetDetails() {
         twitterRepository.findAll().forEach(t -> {

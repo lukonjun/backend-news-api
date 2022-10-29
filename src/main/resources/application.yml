@@ -91,10 +91,3 @@ management:
   health:
     status:
       order: UP,DOWN,OUT_OF_SERVICE,UNKNOWN
-
-twitter:
-  api-key: 3OcPF9Kg5bsCR1eYtMz4hixM1
-  api-secret: Q2LZCxGna2ckmMNtJW0f3eKhBRmtkMRhPOv50mVSBsGZKZGBb7
-  access-token: 1444941818047700993-9PGTpStoWYUJDy5YIE1Sz1g9GKWDLc
-  access-token-secret: cwsR23PMMqa5XS3mzlU0G2oTtGzqIDps4V6tsjBn3kbpO
-
