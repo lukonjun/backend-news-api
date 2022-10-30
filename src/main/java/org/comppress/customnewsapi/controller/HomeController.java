@@ -3,7 +3,9 @@ package org.comppress.customnewsapi.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.comppress.customnewsapi.dto.GenericPage;
+import org.comppress.customnewsapi.exceptions.AuthenticationException;
 import org.comppress.customnewsapi.service.HomeService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,12 +31,18 @@ public class HomeController {
             @RequestParam(value = "publisherIds", required = false) List<Long> publisherIds,
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate,
-            @RequestParam(value = "filterOutPaywallArticles", required = false, defaultValue = "false") Boolean filterOutPaywallArticles
+            @RequestParam(value = "filterOutPaywallArticles", required = false, defaultValue = "false") Boolean filterOutPaywallArticles,
+            @RequestParam(value = "guid", required = false) String guid
     ) {
-        log.info("Request Parameter for /home");
-        log.info("page: {}, size: {}, lang: {}, categoryIds: {}, publisherIds: {}, fromDate: {}, toDate: {}, filterOutPaywallArticles: {}",
-                page, size, lang, categoryIds, publisherIds, fromDate, toDate, filterOutPaywallArticles);
-        return homeService.getHome(page, size, lang, categoryIds, publisherIds, fromDate, toDate, filterOutPaywallArticles);
+        try {
+            log.info("Request Parameter for /home");
+            log.info("page: {}, size: {}, lang: {}, categoryIds: {}, publisherIds: {}, fromDate: {}, toDate: {}, filterOutPaywallArticles: {}, guid {}",
+                    page, size, lang, categoryIds, publisherIds, fromDate, toDate, filterOutPaywallArticles, guid);
+            return homeService.getHome(page, size, lang, categoryIds, publisherIds, fromDate, toDate, filterOutPaywallArticles, guid);
+        }
+        catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
 }
