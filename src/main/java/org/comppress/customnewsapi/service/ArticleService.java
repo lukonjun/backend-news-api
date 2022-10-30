@@ -278,7 +278,14 @@ public class ArticleService {
         return response.body();
     }
 
-    public ResponseEntity<GenericPage<CustomArticleDto>> getArticles(int page, int size, String title, String category, String publisherNewsPaper, String lang, Boolean filterOutPaywallArticles, String fromDate, String toDate) {
+    public ResponseEntity<GenericPage<CustomArticleDto>> getArticles(int page, int size, String title, String category, String publisherNewsPaper, String lang, Boolean filterOutPaywallArticles, String fromDate, String toDate, String guid) throws AuthenticationException {
+
+        UserEntity userEntity = null;
+        if (guid == null) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            userEntity = userRepository.findByUsernameAndDeletedFalse(authentication.getName());
+            if(userEntity == null) throw new AuthenticationException("You are not authorized, please login","");
+        }
 
         Page<CustomArticle> articlesPage = articleRepository
                 .retrieveByCategoryOrPublisherNameToCustomArticle(category,
@@ -288,7 +295,21 @@ public class ArticleService {
 
         GenericPage<CustomArticleDto> genericPage = new GenericPage<>();
         genericPage.setData(articlesPage.stream().map(mapstructMapper::customArticleToCustomArticleDto).collect(Collectors.toList()));
-
+        for(CustomArticleDto customArticleDto:genericPage.getData()){
+            if(userEntity != null){
+                if(!ratingRepository.findByUserIdAndArticleId(userEntity.getId(),customArticleDto.getId()).isEmpty()){
+                    customArticleDto.setIsRatedByUser(true);
+                } else {
+                    customArticleDto.setIsRatedByUser(false);
+                }
+            }else{
+                if(!ratingRepository.findByGuidAndArticleId(guid, customArticleDto.getId()).isEmpty()){
+                    customArticleDto.setIsRatedByUser(true);
+                } else {
+                    customArticleDto.setIsRatedByUser(false);
+                }
+            }
+        }
         // TODO Rewrite this with MapStruct instead of copyProperties?
         BeanUtils.copyProperties(articlesPage, genericPage);
 

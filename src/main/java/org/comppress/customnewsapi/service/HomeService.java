@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.comppress.customnewsapi.dto.CustomCategoryDto;
 import org.comppress.customnewsapi.dto.GenericPage;
+import org.comppress.customnewsapi.dto.article.ArticleDto;
 import org.comppress.customnewsapi.dto.article.CustomArticleDto;
 import org.comppress.customnewsapi.dto.article.CustomRatedArticleDto;
 import org.comppress.customnewsapi.entity.AbstractEntity;
@@ -12,11 +13,9 @@ import org.comppress.customnewsapi.entity.PublisherEntity;
 import org.comppress.customnewsapi.entity.UserEntity;
 import org.comppress.customnewsapi.entity.article.CustomArticle;
 import org.comppress.customnewsapi.entity.article.CustomRatedArticle;
+import org.comppress.customnewsapi.exceptions.AuthenticationException;
 import org.comppress.customnewsapi.mapper.MapstructMapper;
-import org.comppress.customnewsapi.repository.ArticleRepository;
-import org.comppress.customnewsapi.repository.CategoryRepository;
-import org.comppress.customnewsapi.repository.PublisherRepository;
-import org.comppress.customnewsapi.repository.UserRepository;
+import org.comppress.customnewsapi.repository.*;
 import org.comppress.customnewsapi.utils.DateUtils;
 import org.comppress.customnewsapi.utils.PageHolderUtils;
 import org.springframework.beans.BeanUtils;
@@ -44,6 +43,7 @@ public class HomeService implements BaseSpecification {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final PublisherRepository publisherRepository;
+    private final RatingRepository ratingRepository;
     private final TwitterService twitterService;
     private final MapstructMapper mapstructMapper;
 
@@ -116,9 +116,14 @@ public class HomeService implements BaseSpecification {
      * @return
      */
     public ResponseEntity<GenericPage> getHome(int page, int size, String lang, List<Long> categoryIds,
-                                               List<Long> publisherIds, String fromDate, String toDate, Boolean filterOutPaywallArticles) {
-        // if fromDate and toDate null retrieve the last 24 hours
-        //fromDate = getDate(fromDate, toDate);
+                                               List<Long> publisherIds, String fromDate, String toDate, Boolean filterOutPaywallArticles, String guid) throws AuthenticationException {
+
+        UserEntity userEntity = null;
+        if (guid == null) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            userEntity = userRepository.findByUsernameAndDeletedFalse(authentication.getName());
+            if(userEntity == null) throw new AuthenticationException("You are not authorized, please login","");
+        }
 
         // retrieve all publisherIds of lang if null or empty, also retrieve if user has configured publisher preferences
         final List<Long> finalPubIds = getPublisher(publisherIds, lang);
@@ -135,6 +140,29 @@ public class HomeService implements BaseSpecification {
                 category -> getArticlesForCategory(category, lang,
                         finalPubIds, DateUtils.stringToLocalDateTime(fromDate), DateUtils.stringToLocalDateTime(toDate), filterOutPaywallArticles)
         ).collect(Collectors.toList());
+
+        UserEntity finalUserEntity = userEntity;
+        customCategoryDtos.stream().forEach(customCategoryDto -> {
+            // Check if has been rated by user
+
+            if(customCategoryDto.getArticle() != null){
+                ArticleDto articleDto = customCategoryDto.getArticle();
+                if(finalUserEntity != null){
+                    if(!ratingRepository.findByUserIdAndArticleId(finalUserEntity.getId(),articleDto.getId()).isEmpty()){
+                        articleDto.setIsRatedByUser(true);
+                    } else {
+                        articleDto.setIsRatedByUser(false);
+                    }
+                }else{
+                    if(!ratingRepository.findByGuidAndArticleId(guid, articleDto.getId()).isEmpty()){
+                        articleDto.setIsRatedByUser(true);
+                    } else {
+                        articleDto.setIsRatedByUser(false);
+                    }
+                }
+            }
+        });
+
         return PageHolderUtils.getResponseEntityGenericPage(page, size, customCategoryDtos);
     }
 

@@ -37,12 +37,17 @@ public class ArticleController {
             @RequestParam(value = "lang", required = false, defaultValue = "en") String lang,
             @RequestParam(value = "filterOutPaywallArticles", required = false, defaultValue = "false") Boolean filterOutPaywallArticles,
             @RequestParam(value = "fromDate", required = false) String fromDate,
-            @RequestParam(value = "toDate", required = false) String toDate
+            @RequestParam(value = "toDate", required = false) String toDate,
+            @RequestParam(value = "guid", required = false) String guid
     ) {
-        log.info("Request Parameter for /articles");
-        log.info("page: {}, size: {}, title: {}, category: {}, publisherNewsPaper: {}, lang: {}, filterOutPaywallArticles: {}, fromDate: {}, toDate: {}",
-                page, size, title, category, publisherNewsPaper, lang, filterOutPaywallArticles, fromDate, toDate);
-        return articleService.getArticles(page, size, title, category, publisherNewsPaper, lang, filterOutPaywallArticles, fromDate, toDate);
+        try{
+            log.info("Request Parameter for /articles");
+            log.info("page: {}, size: {}, title: {}, category: {}, publisherNewsPaper: {}, lang: {}, filterOutPaywallArticles: {}, fromDate: {}, toDate: {}, guid: {}",
+                    page, size, title, category, publisherNewsPaper, lang, filterOutPaywallArticles, fromDate, toDate, guid);
+            return articleService.getArticles(page, size, title, category, publisherNewsPaper, lang, filterOutPaywallArticles, fromDate, toDate, guid);
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @GetMapping("/unrated")
