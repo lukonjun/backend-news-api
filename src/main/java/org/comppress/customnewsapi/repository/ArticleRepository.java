@@ -110,7 +110,7 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
               AND (:language is null or :language = '' or rf.lang LIKE :language)
               AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
               AND a.published_at BETWEEN IFNULL(:fromDate, NOW() - INTERVAL 1 DAY) AND IFNULL(:toDate,now())
-            group by v.article_id order by totalAverageRating DESC
+            group by v.article_id order by totalAverageRating DESC, a.published_at DESC
             """, nativeQuery = true)
     List<CustomRatedArticle> retrieveAllRatedArticlesInDescOrder(
             @Param("categoryId") Long categoryId,
@@ -141,7 +141,7 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
                          AND p.id in :publisherIds
                          AND (:filterOutPaywallArticles = FALSE or a.paywall_article = FALSE)
                          AND a.published_at BETWEEN IFNULL(:fromDate, NOW() - INTERVAL 1 DAY) AND IFNULL(:toDate,now())
-        group by v.article_id order by totalAverageRating DESC LIMIT 1
+        group by v.article_id order by totalAverageRating DESC, a.published_at DESC LIMIT 1
                         """, nativeQuery = true)
     CustomRatedArticle retrieveOneRatedArticleByCategoryIdsAndPublisherIdsAndLanguageAndLimit(
             @Param("categoryId") Long categoryId,
